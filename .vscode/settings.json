@@ -2,8 +2,6 @@
     "cSpell.words": [
         "fantomas",
         "Ionide",
-        "paket",
-        "remotedev",
         "Xunit"
     ],
     "testExplorer.hideWhen": "noTests",
@@ -16,13 +14,10 @@
     "FSharp.excludeProjectDirectories": [
 		".git",
         ".config",
-		".paket",
         ".vscode",
 		"bin",
 		"dist",
-		"node_modules",
 		"obj",
-		"output",
-		"paket-files"
+		"output"
     ]
 }

@@ -4,7 +4,4 @@ bin/
 obj/
 output/
 
-# Paket dependency manager
-paket-files/
-
 dist/
