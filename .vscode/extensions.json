@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "ionide.ionide-fsharp",
+        "ionide.ionide-paket",
+        "tintoy.msbuild-project-tools",
+        "diku.futhark-vscode"
+    ]
+}
