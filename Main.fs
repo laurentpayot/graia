@@ -2,7 +2,7 @@
 
 module NN =
     [<DllImport(@"lib/nn.c", CallingConvention = CallingConvention.Cdecl)>]
-    extern int main(int)
+    extern int32 main(int32)
 
 let result = NN.main 1
 
