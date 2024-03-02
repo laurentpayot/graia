@@ -1,2 +1,9 @@
-﻿// For more information see https://aka.ms/fsharp-console-apps
-printfn "Hello from F#"
+﻿open System.Runtime.InteropServices
+
+module NN =
+    [<DllImport(@"lib/nn.c", CallingConvention = CallingConvention.Cdecl)>]
+    extern int main(int)
+
+let result = NN.main 1
+
+printfn "Result: %d" result
