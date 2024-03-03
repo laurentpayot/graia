@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="lib/nn.c" CopyToOutputDirectory="Always" TargetPath="lib/nn.c" />
+    <Content Include="lib/*" CopyToOutputDirectory="Always" TargetFolder="lib/" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 
