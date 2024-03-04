@@ -8,10 +8,14 @@ To run Graia, you will need:
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download)
 - [Futhark](https://futhark.readthedocs.io/en/stable/installation.html#installing-from-a-precompiled-snapshot)
-- OpenCL (Debian/Ubuntu)
-  - Headers: `sudo apt install opencl-headers`
-  - [PoCL](http://portablecl.org/) if needed: `sudo apt install pocl-opencl-icd`
 
+On Debian/Ubuntu systems:
+
+- `gcc`
+- OpenCL
+  - If no OpenCL device is listed with `clinfo -l`, install `pocl-opencl-icd`
+  - If missing *CL/cl.h* error, install `opencl-headers`
+  - If missing *-lOpenCL* error, create an OpenCL link: `sudo ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /usr/lib/libOpenCL.so`
 
 ## Usage
 
