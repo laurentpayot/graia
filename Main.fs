@@ -11,8 +11,9 @@ module NN =
 printfn "foo: %A" NN.futhark_entry_foo
 printfn "bar: %A" NN.futhark_entry_bar
 
+printfn "Starting…"
 
 printfn "foo result: %d" <| NN.futhark_entry_foo 100
 printfn "bar result: %d" <| NN.futhark_entry_bar 100
 
-printfn "Done"
+printfn "Done!"
