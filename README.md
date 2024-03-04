@@ -4,12 +4,9 @@ Neural network implemented in Futhark
 
 ## Prerequisites
 
-To run Graia, you will need:
+To run Graia in a Jupyter Notebook on a Debian/Ubuntu system, you will need:
 
 - [Futhark](https://futhark.readthedocs.io/en/stable/installation.html#installing-from-a-precompiled-snapshot)
-
-On Debian/Ubuntu systems:
-
 - OpenCL
   - If no OpenCL device is listed with `clinfo -l`, install `pocl-opencl-icd`
   - If missing *CL/cl.h* error, install `opencl-headers`
