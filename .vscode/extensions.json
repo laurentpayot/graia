@@ -1,8 +1,6 @@
 {
     "recommendations": [
-        "ionide.ionide-fsharp",
-        "tintoy.msbuild-project-tools",
-        "diku.futhark-vscode",
-        "ms-vscode.makefile-tools"
+        "ms-toolsai.jupyter",
+        "tomoki1207.pdf"
     ]
 }

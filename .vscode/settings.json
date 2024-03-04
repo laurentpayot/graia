@@ -1,24 +1,5 @@
 {
     "cSpell.words": [
-        "fantomas",
-        "Graia",
-        "Ionide",
-        "Xunit"
-    ],
-    "testExplorer.hideWhen": "noTests",
-    "[fsharp]": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "Ionide.Ionide-fsharp",
-        "editor.inlayHints.enabled": "offUnlessPressed"
-    },
-    "FSharp.showExplorerOnStartup": false,
-    "FSharp.excludeProjectDirectories": [
-		".git",
-        ".config",
-        ".vscode",
-		"bin",
-		"dist",
-		"obj",
-		"output"
+        "Graia"
     ]
 }
