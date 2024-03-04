@@ -1,9 +1,17 @@
 ﻿open System.Runtime.InteropServices
 
 module NN =
-    [<DllImport("lib/nn")>]
-    extern int32 main(int32)
+    [<DllImport("lib/nn", CallingConvention = CallingConvention.Cdecl)>]
+    extern int32 futhark_entry_foo(int32)
 
-let result = NN.main 1
+    extern int32 futhark_entry_bar()
 
-printfn "Result: %d" result
+
+printfn "foo: %A" NN.futhark_entry_foo
+printfn "bar: %A" NN.futhark_entry_bar
+
+
+printfn "foo result: %d" <| NN.futhark_entry_foo 100
+printfn "bar result: %d" <| NN.futhark_entry_bar ()
+
+printfn "Done"
