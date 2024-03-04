@@ -15,7 +15,3 @@ On Debian/Ubuntu systems:
   - If missing *CL/cl.h* error, install `opencl-headers`
   - If missing *-lOpenCL* error, create an OpenCL link: `sudo ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /usr/lib/libOpenCL.so`
 - [Anaconda](https://docs.anaconda.com/free/anaconda/install/linux/)
-
-### Build
-
-- `make`
