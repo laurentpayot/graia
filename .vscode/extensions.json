@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "ms-toolsai.jupyter",
-        "tomoki1207.pdf"
+        "tomoki1207.pdf",
+        "diku.futhark-vscode"
     ]
 }
