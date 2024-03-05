@@ -1,6 +1,8 @@
 {
     "recommendations": [
         "ms-toolsai.jupyter",
-        "diku.futhark-vscode"
+        "diku.futhark-vscode",
+        "ms-python.python",
+        "ms-python.debugpy"
     ]
 }
