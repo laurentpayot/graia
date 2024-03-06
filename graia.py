@@ -5,10 +5,10 @@ import numpy as np
 # Graia compilation
 subprocess.run(["mkdir", "-p", "lib"])
 subprocess.run(["futhark", "pyopencl", "--library", "-o", "lib/graia", "graia.fut"])
-import lib.graia
+from lib import graia
 
 print("\nInitializing Graia…")
-g = lib.graia.graia()
+g = graia.graia()
 print("Graia initialized.\n")
 
 @dataclass
