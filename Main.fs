@@ -4,7 +4,7 @@ open System.Numerics
 
 printfn "🌄 Graia v0.0.1"
 
-printfn "Popcnt: %b" Popcnt.IsSupported
+printfn "Popcnt.X64: %b" Popcnt.X64.IsSupported
 printfn "Vector: %b" Vector.IsHardwareAccelerated
 printfn "Vector512: %b" Vector512.IsHardwareAccelerated
 printfn "Vector256: %b" Vector256.IsHardwareAccelerated
