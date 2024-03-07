@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="lib/nn.so" CopyToOutputDirectory="PreserveNewest" TargetFolder="lib/" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 
