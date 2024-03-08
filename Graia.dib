@@ -7,12 +7,13 @@
 #r "nuget:Microsoft.ML,3.0.1"
 open Microsoft.ML
 
+#load "Graia.fs"
+open Graia
+
 #!fsharp
 
 let ctx = MLContext()
 
 #!fsharp
 
-#load "Graia.fs"
-open Graia
 foo 1 2
