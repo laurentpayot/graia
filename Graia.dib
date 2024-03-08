@@ -5,6 +5,8 @@
 #!fsharp
 
 #r "nuget:Microsoft.ML,3.0.1"
-
 open Microsoft.ML
+
+#!fsharp
+
 let ctx = MLContext()
