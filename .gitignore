@@ -4,4 +4,4 @@ bin/
 obj/
 output/
 
-dist/
+datasets/
