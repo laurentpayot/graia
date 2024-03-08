@@ -1,19 +1,20 @@
 #!meta
 
-{"kernelInfo":{"defaultKernelName":"fsharp","items":[{"aliases":[],"languageName":"fsharp","name":"fsharp"}]}}
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"name":"csharp"},{"aliases":[],"languageName":"fsharp","name":"fsharp"}]}}
 
 #!fsharp
 
-#r "nuget:Microsoft.ML,3.0.1"
-open Microsoft.ML
-
+#r "nuget: FSharpPlus"
 #load "Graia.fs"
 open Graia
 
 #!fsharp
 
-let ctx = MLContext()
+let rows = loadMnist "datasets/mnist_train.csv"
 
 #!fsharp
 
-foo 1 2
+printfn $"Rows: {rows.Length}"
+let label, data = rows[0]
+printfn $"First label: {label}"
+printfn $"First data: %A{data}"

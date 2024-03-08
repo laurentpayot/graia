@@ -9,4 +9,8 @@
     <Compile Include="Graia.fs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FSharpPlus" Version="1.6.1" />
+  </ItemGroup>
+
 </Project>

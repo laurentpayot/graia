@@ -3,6 +3,7 @@
         "fantomas",
         "Graia",
         "Ionide",
+        "mnist",
         "Xunit"
     ],
     "testExplorer.hideWhen": "noTests",
