@@ -4,5 +4,6 @@
 
 #!fsharp
 
-let a = 1
-a
+#r "nuget:Microsoft.ML,3.0.1"
+
+let ctx = MLContext()
