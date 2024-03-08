@@ -10,3 +10,9 @@ open Microsoft.ML
 #!fsharp
 
 let ctx = MLContext()
+
+#!fsharp
+
+#load "Graia.fs"
+open Graia
+foo 1 2
