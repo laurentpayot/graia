@@ -6,4 +6,5 @@
 
 #r "nuget:Microsoft.ML,3.0.1"
 
+open Microsoft.ML
 let ctx = MLContext()
