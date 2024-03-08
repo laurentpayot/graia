@@ -36,3 +36,9 @@ let loadMnist (path: string) : Row array =
             let data = Seq.skip 1 row |> Seq.map byte
             Array.append acc [| (label, data) |])
         [||]
+
+// print a 28x28 svg representation of the 784x1 byte array
+let toSvg (data: byte seq) = data |> Seq.chunkBySize 28
+// TODO
+// |> sprintf
+//     "<svg width=\"28\" height=\"28\" viewBox=\"0 0 784 28\" xmlns=\"http://www.w3.org/2000/svg\">\n%s\n</svg>"
