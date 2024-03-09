@@ -4,8 +4,12 @@
 
 #!fsharp
 
+// #r "output/bin/Debug/net8.0/graia.dll" // to be used after `dotnet build` (dependencies included)
+
+// dependencies needed for development
 #r "nuget: FSharpPlus"
-#load "Graia.fs"
+#load "./Graia.fs"
+
 open Graia
 
 #!fsharp
@@ -18,7 +22,3 @@ printfn $"Rows: {rows.Length}"
 let label, data = rows[0]
 printfn $"First label: {label}"
 printfn $"First data: %A{data}"
-
-#!fsharp
-
-toSvg data
