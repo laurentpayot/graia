@@ -37,16 +37,16 @@ let loadMnist (path: string) : Row array =
             Array.append acc [| (label, data) |])
         [||]
 
-let toSvg (data: byte seq) : string =
+let toSvg (side: int) (data: byte seq) : string =
     let array = Array.ofSeq data
 
     let mutable svg =
-        """"<svg width="70" height="70" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">"""
+        $""""<svg width="{side * 2}" height="{side * 2}" viewBox="0 0 {side} {side}" xmlns="http://www.w3.org/2000/svg">"""
         + "\n"
 
-    for y = 0 to 27 do
-        for x = 0 to 27 do
-            let v = array[x + y * 28]
+    for y = 0 to side - 1 do
+        for x = 0 to side - 1 do
+            let v = array[x + y * side]
 
             svg <-
                 svg

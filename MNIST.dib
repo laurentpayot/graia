@@ -19,7 +19,6 @@ printfn $"Rows: {rows.Length}"
 
 #!fsharp
 
-let label, data = rows[0]
-printfn $"Label: {label}"
-let img = toSvg data
-img.DisplayAs("image/svg+xml")
+rows
+|> Array.take 5
+|> Array.map (fun (_, data) -> (toSvg 28 data).DisplayAs("image/svg+xml"))
