@@ -3,6 +3,7 @@
 open System.IO
 
 open FSharpPlus
+open System
 
 
 
@@ -19,9 +20,8 @@ printfn "🌄 Graia v0.0.1"
 // printfn "Vector256<byte>.Count: %d" Vector256<byte>.Count
 // printfn "Vector256<uint64>.Count: %d" Vector256<uint64>.Count
 
-type RowLabel = string
-type RowData = byte seq
-type Row = RowLabel * RowData
+
+type Row = string * byte seq
 
 
 let loadMnist (path: string) : Row array =
@@ -37,8 +37,22 @@ let loadMnist (path: string) : Row array =
             Array.append acc [| (label, data) |])
         [||]
 
-// print a 28x28 svg representation of the 784x1 byte array
-let toSvg (data: byte seq) = data |> Seq.chunkBySize 28
-// TODO
-// |> sprintf
-//     "<svg width=\"28\" height=\"28\" viewBox=\"0 0 784 28\" xmlns=\"http://www.w3.org/2000/svg\">\n%s\n</svg>"
+let toSvg (data: byte seq) : string =
+    let array = Array.ofSeq data
+
+    let mutable svg =
+        """"<svg width="70" height="70" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">"""
+        + "\n"
+
+    for x = 0 to 27 do
+        for y = 0 to 27 do
+            let v = array[x * 28 + y]
+
+            svg <-
+                svg
+                + $"""<rect x="{x}" y="{y}" width="1" height="1" fill="rgb({v},{v},{v})"/>"""
+
+        svg <- svg + "\n"
+
+    svg <- svg + "</svg>"
+    svg
