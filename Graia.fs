@@ -37,11 +37,12 @@ let loadMnist (path: string) : Row seq =
             Seq.append acc [| (label, data) |])
         [||]
 
-let toSvg (side: int) (data: byte seq) : string =
+let toSvg (size: float) (data: byte seq) : string =
     let array = Array.ofSeq data
+    let side = array.Length |> sqrt
 
     let mutable svg =
-        $""""<svg width="{side * 2}" height="{side * 2}" viewBox="0 0 {side} {side}" xmlns="http://www.w3.org/2000/svg">"""
+        $""""<svg width="{(float side) * size}" height="{(float side) * size}" viewBox="0 0 {side} {side}" xmlns="http://www.w3.org/2000/svg">"""
         + "\n"
 
     for y = 0 to side - 1 do
