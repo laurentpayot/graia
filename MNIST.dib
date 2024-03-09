@@ -21,4 +21,6 @@ printfn $"Rows: {rows.Length}"
 
 rows
 |> Array.take 5
-|> Array.map (fun (_, data) -> (toSvg 28 data).DisplayAs("image/svg+xml"))
+|> Array.map snd
+|> Array.map (toSvg 28)
+|> Array.map .DisplayAs("image/svg+xml")
