@@ -24,7 +24,7 @@ printfn "🌄 Graia v0.0.1"
 type Row = string * byte seq
 
 
-let loadMnist (path: string) : Row array =
+let loadMnist (path: string) : Row seq =
     File.ReadAllText(path)
     |> String.split [ "\n" ]
     // remove header row
@@ -34,7 +34,7 @@ let loadMnist (path: string) : Row array =
         (fun acc row ->
             let label = Seq.head row
             let data = Seq.skip 1 row |> Seq.map byte
-            Array.append acc [| (label, data) |])
+            Seq.append acc [| (label, data) |])
         [||]
 
 let toSvg (side: int) (data: byte seq) : string =

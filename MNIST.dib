@@ -15,12 +15,11 @@ open Graia
 #!fsharp
 
 let rows = loadMnist "datasets/mnist_train_head.csv"
-printfn $"Rows: {rows.Length}"
 
 #!fsharp
 
 rows
-|> Array.take 5
-|> Array.map snd
-|> Array.map (toSvg 28)
-|> Array.map (fun img -> img.DisplayAs("image/svg+xml"))
+|> Seq.take 5
+|> Seq.map snd
+|> Seq.map (toSvg 28)
+|> Seq.map (fun img -> img.DisplayAs("image/svg+xml"))
