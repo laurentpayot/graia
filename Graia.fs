@@ -37,7 +37,7 @@ let loadMnist (path: string) : Row seq =
             Seq.append acc [| (label, data) |])
         [||]
 
-let toSvg (size: float) (data: byte seq) : string =
+let toSquareSvg (size: float) (data: byte seq) : string =
     let array = Array.ofSeq data
     let side = array.Length |> sqrt
 
