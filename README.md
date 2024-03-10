@@ -11,10 +11,13 @@ To run Graia along with a F# notebook you will need:
 
 ## Installation
 
+1. `cd src`
 1. `dotnet restore` to install the dependencies.
 1. `dotnet build` to create the Graia library.
 
-### Notebook MNIST example
+## Notebook usage
+
+### MNIST
 
 1. Download [the MNIST dataset provided in a easy-to-use CSV format](https://www.kaggle.com/datasets/oddrationale/mnist-in-csv).
-1. Extract the two CSV files from the zip archive and place them in a folder named `datasets`.
+1. Extract the two CSV files from the zip archive and place them in a folder named `datasets` inside the `notebooks` folder.

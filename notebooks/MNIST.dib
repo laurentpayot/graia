@@ -4,17 +4,19 @@
 
 #!fsharp
 
-// #r "output/bin/Debug/net8.0/graia.dll" // to be used after `dotnet build` (dependencies included)
+// #r "../output/bin/Debug/net8.0/graia.dll" // to be used after `dotnet build` (dependencies included)
 
 // dependencies needed for development
 #r "nuget: FSharpPlus"
-#load "./Graia.fs"
+#load "../src/Graia.fs"
+#load "../src/Tools.fs"
 
 open Graia
+open Tools
 
 #!fsharp
 
-let rows = loadMnist "datasets/mnist_train_head.csv"
+let rows = loadMnist "datasets/mnist_train.csv"
 
 #!fsharp
 
