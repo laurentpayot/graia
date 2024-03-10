@@ -16,7 +16,7 @@ open Tools
 
 #!fsharp
 
-let rows = loadMnist "datasets/mnist_train.csv"
+let rows = loadMnist "datasets/mnist_train_head.csv"
 
 #!fsharp
 
