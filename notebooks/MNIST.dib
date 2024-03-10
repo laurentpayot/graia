@@ -23,5 +23,6 @@ let rows = loadMnist "datasets/mnist_train_head.csv"
 rows
 |> Seq.take 5
 |> Seq.map snd
+|> Seq.map (binarize 200)
 |> Seq.map (toSquareSvg 2)
 |> Seq.map (fun img -> img.DisplayAs("image/svg+xml"))

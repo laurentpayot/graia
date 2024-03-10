@@ -5,10 +5,7 @@ open System.IO
 open FSharpPlus
 
 
-type Row = string * byte seq
-
-
-let loadMnist (path: string) : Row seq =
+let loadMnist (path: string) : (string * byte seq) seq =
     File.ReadAllText(path)
     |> String.split [ "\n" ]
     // remove header row
@@ -21,8 +18,11 @@ let loadMnist (path: string) : Row seq =
             Seq.append acc [| (label, data) |])
         [||]
 
-let toSquareSvg (size: float) (data: byte seq) : string =
-    let array = Array.ofSeq data
+let binarize (threshold: int) (bytes: byte seq) : byte seq =
+    bytes |> Seq.map (fun v -> if v >= (byte threshold) then 255uy else 0uy)
+
+let toSquareSvg (size: float) (bytes: byte seq) : string =
+    let array = Array.ofSeq bytes
     let side = array.Length |> sqrt
 
     let mutable svg =
