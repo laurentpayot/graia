@@ -16,13 +16,13 @@ open Tools
 
 #!fsharp
 
-let rows = loadMnist "datasets/mnist_train_head.csv"
+let labels, images = loadMnist "datasets/mnist_train_head.csv"
+printfn $"Images: {images.Length}"
 
 #!fsharp
 
-rows
-|> Seq.take 5
-|> Seq.map snd
-|> Seq.map (binarize 200)
-|> Seq.map (toSquareSvg 2)
-|> Seq.map (fun img -> img.DisplayAs("image/svg+xml"))
+images
+|> Array.take 5
+|> Array.map (binarize 200)
+|> Array.map (toSquareSvg 1)
+|> Array.map (fun svg -> svg.DisplayAs("image/svg+xml"))
