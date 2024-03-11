@@ -21,7 +21,8 @@ let loadMnist (path: string) : string array * byte seq array =
     |> Array.unzip
 
 let binarize (threshold: int) (bytes: byte seq) : byte seq =
-    bytes |> Seq.map (fun v -> if v >= (byte threshold) then 255uy else 0uy)
+    let threshold = byte threshold
+    bytes |> Seq.map (fun value -> if value >= threshold then 255uy else 0uy)
 
 let toSquareSvg (size: float) (bytes: byte seq) : string =
     let array = Array.ofSeq bytes
