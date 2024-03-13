@@ -1,23 +1,15 @@
 # 🌄 Graia
 
-An F# experimental binary artificial neural network.
+Neural network implemented in Futhark
 
 ## Prerequisites
 
-To run Graia along with a F# notebook you will need:
+To run Graia in a Jupyter Notebook on a Debian/Ubuntu system, you will need:
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download)
-- [Polyglot Notebook VS Code Extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.dotnet-interactive-vscode)
-
-## Installation
-
-1. `cd src`
-1. `dotnet restore` to install the dependencies.
-1. `dotnet build` to create the Graia library.
-
-## Notebook usage
-
-### MNIST
-
-1. Download [the MNIST dataset provided in a easy-to-use CSV format](https://www.kaggle.com/datasets/oddrationale/mnist-in-csv).
-1. Extract the two CSV files from the zip archive and place them in a folder named `datasets` inside the `notebooks` folder.
+- [Futhark](https://futhark.readthedocs.io/en/stable/installation.html#installing-from-a-precompiled-snapshot)
+- OpenCL
+  - If no OpenCL device is listed with `clinfo -l`, install `pocl-opencl-icd`
+  - If missing *CL/cl.h* error, install `opencl-headers`
+  - If missing *-lOpenCL* error, create an OpenCL link: `sudo ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /usr/lib/libOpenCL.so`
+- [Anaconda](https://docs.anaconda.com/free/anaconda/install/linux/)
+  - [Update Python to 3.12+ ](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-python.html)

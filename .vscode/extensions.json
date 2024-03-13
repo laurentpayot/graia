@@ -1,8 +1,8 @@
 {
     "recommendations": [
-        "ionide.ionide-fsharp",
-        "tintoy.msbuild-project-tools",
-        "ms-vscode.makefile-tools",
-        "ms-dotnettools.dotnet-interactive-vscode"
+        "ms-toolsai.jupyter",
+        "diku.futhark-vscode",
+        "ms-python.python",
+        "ms-python.debugpy"
     ]
 }
