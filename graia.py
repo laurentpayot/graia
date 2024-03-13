@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from typing import List
 import subprocess
 import numpy as np
 
@@ -14,11 +14,23 @@ print("Initializing Graia…")
 g = graia.graia()
 print("Graia ready.\n")
 
-@dataclass
-class Graia:
-    layer_nb: int
-    layer_size: int
-    def fit (self, epoch: int) -> int: return self.layer_size + self.layer_nb * epoch + g.fit(2)
 
-# model = Graia(1, 2)
+class Graia:
+    def __init__(self, inputs: int, layers: int, layer_neurons: int, neuron_dendrites: int, outputs: int):
+        self.config : dict = {
+            "inputs": inputs,
+            "layers": layers,
+            "layer_neurons": layer_neurons,
+            "neuron_dentrites": neuron_dendrites,
+            "outputs": outputs
+        }
+        # TODO
+        self.positive_weights: np.array[np.array[np.bool_]] = np.array([[0]], dtype=np.bool_)
+        self.negative_weights: np.array[np.array[np.bool_]] = np.array([[0]], dtype=np.bool_)
+
+    def fit (self, xs: np.array[np.array[np.uint8]], ys: np.array[np.uint8], epochs: int) -> int:
+        return 42
+
+
+# model = Graia(4, 2)
 # print(model.fit(10))
