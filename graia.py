@@ -25,8 +25,8 @@ class Graia:
             "outputs": outputs
         }
         # TODO
-        self.positive_weights: np.array[np.array[np.bool_]] = np.array([[0]], dtype=np.bool_)
-        self.negative_weights: np.array[np.array[np.bool_]] = np.array([[0]], dtype=np.bool_)
+        self.a_weights: np.array[np.array[np.bool_]] = np.array([[0]], dtype=np.bool_)
+        self.b_weights: np.array[np.array[np.bool_]] = np.array([[0]], dtype=np.bool_)
 
     def fit (self, xs: np.array[np.array[np.uint8]], ys: np.array[np.uint8], epochs: int) -> int:
         return 42
