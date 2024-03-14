@@ -1,6 +1,6 @@
 # 🌄 Graia
 
-Neural network implemented in Futhark
+An *experimental* neural network library.
 
 ## Prerequisites
 
