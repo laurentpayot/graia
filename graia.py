@@ -42,6 +42,8 @@ class Graia:
         }
 
         # TODO
+        # A weight of n is actually the inverse of 2 at the power of n (right shift by abs(n) - 1)
+        # Weights are negative for inhibition, positive for excitation, zero for no connection
         self.input_weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
         self.hidden_weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
         self.output_weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
