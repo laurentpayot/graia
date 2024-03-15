@@ -1,22 +1,26 @@
-from typing import List
-import subprocess
+# from typing import Tuple
 import numpy as np
+from numpy.typing import NDArray
+import subprocess
 
 print("\n🌄 Graia v0.0.1\n")
 
-print("Compiling Graia…")
+print("Graia compiling…")
 subprocess.run(["mkdir", "-p", "lib"])
 subprocess.run(["touch", "lib/__init__.py"])
 subprocess.run(["futhark", "pyopencl", "--library", "-o", "lib/graia", "graia.fut"])
+
 from lib import graia
 
-print("Initializing Graia…")
+print("Graia initializing…")
 g = graia.graia()
 print("Graia ready.\n")
 
 
 class Graia:
-    def __init__(self, inputs: int, layers: int, layer_neurons: int, neuron_dendrites: int, outputs: int):
+    def __init__(self, inputs: int, layers: int, layer_neurons: int, neuron_dendrites: int, outputs: int) -> None:
+
+        self.parameters: int = (inputs * layer_neurons) + (layer_neurons * neuron_dendrites * (layers - 1)) + (layer_neurons * outputs)
         self.config : dict = {
             "inputs": inputs,
             "layers": layers,
@@ -25,12 +29,10 @@ class Graia:
             "outputs": outputs
         }
         # TODO
-        self.a_weights: np.array[np.array[np.bool_]] = np.array([[0]], dtype=np.bool_)
-        self.b_weights: np.array[np.array[np.bool_]] = np.array([[0]], dtype=np.bool_)
+        self.weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
+        print(f"Graia model with {self.parameters} parameters ready.")
 
-    def fit (self, xs: np.array[np.array[np.uint8]], ys: np.array[np.uint8], epochs: int) -> int:
-        return 42
-
-
-# model = Graia(4, 2)
-# print(model.fit(10))
+    def fit (self, xs, ys, epochs: int):
+        return g.fit(xs, ys, epochs)
+        # return g.main(np.array([1,2,3], dtype=np.int32),
+        #    np.array([4,5,6], dtype=np.int32))
