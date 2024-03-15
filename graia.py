@@ -32,6 +32,7 @@ class Graia:
             (layer_neurons * layer_neurons * (layers - 1)) +
             (layer_neurons * outputs)
         )
+
         self.config : dict = {
             "inputs": inputs,
             "layers": layers,
@@ -39,9 +40,13 @@ class Graia:
             "outputs": outputs,
             # "neuron_dentrites": neuron_dendrites,
         }
+
         # TODO
-        self.weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
+        self.input_weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
+        self.hidden_weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
+        self.output_weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
         print(f"Graia model with {self.parameters} parameters ready.")
+
 
     def fit (self, xs: NDArray[np.uint8], ys: NDArray[np.uint8], epochs: int):
         return g.fit(xs, ys, np.int32(epochs))

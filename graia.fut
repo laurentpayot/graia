@@ -1,9 +1,9 @@
 -- Graia
 
 -- TODO add model parameter
-entry fit [n] (xs: [n][]u8, ys: [n]u8, epochs: i32): (i64, i64) =
+entry fit (xs: [][]u8, ys: []u8, epochs: i32): i32 =
   -- TODO
-  (n, n)
+  42
 
 entry predict (x: i32): i32 =
   x + 42
