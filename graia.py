@@ -18,15 +18,26 @@ print("Graia ready.\n")
 
 
 class Graia:
-    def __init__(self, inputs: int, layers: int, layer_neurons: int, neuron_dendrites: int, outputs: int) -> None:
+    def __init__(self,
+                inputs: int,
+                layers: int,
+                layer_neurons: int,
+                outputs: int,
+                # TODO
+                neuron_dendrites=0,
+                ) -> None:
 
-        self.parameters: int = (inputs * layer_neurons) + (layer_neurons * neuron_dendrites * (layers - 1)) + (layer_neurons * outputs)
+        self.parameters: int = (
+            (inputs * layer_neurons) +
+            (layer_neurons * layer_neurons * (layers - 1)) +
+            (layer_neurons * outputs)
+        )
         self.config : dict = {
             "inputs": inputs,
             "layers": layers,
             "layer_neurons": layer_neurons,
-            "neuron_dentrites": neuron_dendrites,
-            "outputs": outputs
+            "outputs": outputs,
+            # "neuron_dentrites": neuron_dendrites,
         }
         # TODO
         self.weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
