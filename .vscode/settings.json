@@ -3,6 +3,7 @@
         "dentrites",
         "dtype",
         "Graia",
+        "MNIST",
         "pocl",
         "pyopencl"
     ]

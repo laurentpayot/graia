@@ -32,7 +32,5 @@ class Graia:
         self.weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
         print(f"Graia model with {self.parameters} parameters ready.")
 
-    def fit (self, xs, ys, epochs: int):
-        return g.fit(xs, ys, epochs)
-        # return g.main(np.array([1,2,3], dtype=np.int32),
-        #    np.array([4,5,6], dtype=np.int32))
+    def fit (self, xs: NDArray[np.uint8], ys: NDArray[np.uint8], epochs: int):
+        return g.fit(xs, ys, np.int32(epochs))
