@@ -24,23 +24,25 @@ Weight: TypeAlias = np.int8
 InputVal: TypeAlias = np.uint8
 OutputVal: TypeAlias = np.uint8
 
+
 class Graia:
-    def __init__(self,
-                inputs: int,
-                layer_neurons: int,
-                layers: int,
-                outputs: int,
-                # TODO
-                # neuron_dendrites=0,
-                ) -> None:
+    def __init__(
+        self,
+        inputs: int,
+        layer_neurons: int,
+        layers: int,
+        outputs: int,
+        # TODO
+        # neuron_dendrites=0,
+    ) -> None:
 
         self.parameters: int = (
-            (inputs * layer_neurons) +
-            (layer_neurons * layer_neurons * (layers - 1)) +
-            (layer_neurons * outputs)
+            (inputs * layer_neurons)
+            + (layer_neurons * layer_neurons * (layers - 1))
+            + (layer_neurons * outputs)
         )
 
-        self.config : dict = {
+        self.config: dict = {
             "inputs": inputs,
             "layer_neurons": layer_neurons,
             "layers": layers,
@@ -50,17 +52,19 @@ class Graia:
 
         # TODO
 
-        self.input_weights = np.array([[0, 0],[0, 0]], dtype=Weight)
-        self.hidden_weights = np.array([[[0, 0],[0, 0]], [[0, 0],[0, 0]]], dtype=Weight)
-        self.output_weights = np.array([[0, 0],[0, 0]], dtype=Weight)
+        self.input_weights = np.array([[0, 0], [0, 0]], dtype=Weight)
+        self.hidden_weights = np.array(
+            [[[0, 0], [0, 0]], [[0, 0], [0, 0]]], dtype=Weight
+        )
+        self.output_weights = np.array([[0, 0], [0, 0]], dtype=Weight)
 
         print(f"Graia model with {self.parameters} parameters ready.")
 
-
     def fit(self, xs: NDArray[InputVal], ys: NDArray[OutputVal], epochs: int) -> None:
         for epoch in range(1, epochs):
-            self.input_weights, self.hidden_weights, self.output_weights, precision = g.fit(
-                self.input_weights, self.hidden_weights, self.output_weights,
-                xs, ys
+            self.input_weights, self.hidden_weights, self.output_weights, precision = (
+                g.fit(
+                    self.input_weights, self.hidden_weights, self.output_weights, xs, ys
+                )
             )
             print(f"Epoch {epoch}/{epochs}: precision = {precision}")

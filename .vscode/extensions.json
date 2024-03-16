@@ -3,6 +3,7 @@
         "ms-toolsai.jupyter",
         "diku.futhark-vscode",
         "ms-python.python",
-        "ms-python.debugpy"
+        "ms-python.debugpy",
+        "ms-python.black-formatter"
     ]
 }
