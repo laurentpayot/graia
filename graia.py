@@ -57,8 +57,8 @@ class Graia:
         print(f"Graia model with {self.parameters} parameters ready.")
 
 
-    def fit(self, xs: NDArray[InputVal], ys: NDArray[OutputVal], epochs: int):
-        return g.fit(
+    def fit(self, xs: NDArray[InputVal], ys: NDArray[OutputVal], epochs: int) -> None:
+        self.input_weights, self.hidden_weights, self.output_weights = g.fit(
             self.input_weights, self.hidden_weights, self.output_weights,
             xs, ys, np.int32(epochs)
         )
