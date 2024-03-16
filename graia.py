@@ -57,7 +57,7 @@ class Graia:
         self.input_weights = rng.integers(
             low=-weight_range,
             high=weight_range,
-            size=(inputs, layer_neurons),
+            size=(layer_neurons, inputs),
             dtype=Weight,
             endpoint=True,
         )
@@ -71,7 +71,7 @@ class Graia:
         self.output_weights = rng.integers(
             low=-weight_range,
             high=weight_range,
-            size=(layer_neurons, outputs),
+            size=(outputs, layer_neurons),
             dtype=Weight,
             endpoint=True,
         )
