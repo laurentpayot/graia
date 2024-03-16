@@ -22,10 +22,13 @@ type OutputWs [o][n] = [o][n]Weight
 --   output: OutputWs [o][n] ,
 -- }
 
-entry fit [r][i][n][lmo][o] (inputWs: InputWs [i][n]) (hiddenWs: HiddenWs [lmo][n]) (outputWs: OutputWs [o][n]) ( xs: [r][i]InputVal) (ys: [r]OutputVal) (epochs: i32): (i64, i64) =
+entry fit [r][i][n][lmo][o]
+  (inputWs: InputWs [n][i]) (hiddenWs: HiddenWs [lmo][n]) (outputWs: OutputWs [o][n])
+  ( xs: [r][i]InputVal) (ys: [r]OutputVal) (epochs: i32)
+  : (i64, i64, i64, i64, i64, i32) =
   -- https://futhark.readthedocs.io/en/latest/error-index.html#nonconstructive-entry
   -- TODO
-  (r, i)
+  (r, i, n, lmo, o, epochs)
 
 entry predict (x: i32): i32 =
   x + 42

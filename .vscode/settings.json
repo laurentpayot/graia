@@ -4,6 +4,7 @@
         "dtype",
         "Graia",
         "MNIST",
+        "ndarray",
         "pocl",
         "pyopencl"
     ]

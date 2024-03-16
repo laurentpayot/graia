@@ -1,4 +1,4 @@
-from typing import TypeAlias, TypedDict
+from typing import TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 import subprocess
@@ -16,16 +16,13 @@ print("Graia initializing…")
 g = graia.graia()
 print("Graia ready.\n")
 
+
+# A weight of n is actually the inverse of 2 at the power of n (right shift by abs(n) - 1)
+# Weights are negative for inhibition, positive for excitation, zero for no connection
 Weight: TypeAlias = np.int8
 
-Weights: TypeAlias = NDArray[Weight]
-Inputs: TypeAlias = NDArray[np.uint8]
-Outputs: TypeAlias = NDArray[np.uint8]
-
-class ModelWeights(TypedDict):
-    input: Weights
-    hidden: Weights
-    output: Weights
+InputVal: TypeAlias = np.uint8
+OutputVal: TypeAlias = np.uint8
 
 class Graia:
     def __init__(self,
@@ -34,7 +31,7 @@ class Graia:
                 layers: int,
                 outputs: int,
                 # TODO
-                neuron_dendrites=0,
+                # neuron_dendrites=0,
                 ) -> None:
 
         self.parameters: int = (
@@ -52,15 +49,18 @@ class Graia:
         }
 
         # TODO
-        # A weight of n is actually the inverse of 2 at the power of n (right shift by abs(n) - 1)
-        # Weights are negative for inhibition, positive for excitation, zero for no connection
-        self.weights : ModelWeights = {
-            "input": np.array([[0, 0],[0, 0]], dtype=Weight),
-            "hidden": np.array([[[0, 0],[0, 0]]], dtype=Weight),
-            "output": np.array([[0, 0],[0, 0]], dtype=Weight),
-        }
+
+        self.input_weights = np.array([[0, 0],[0, 0]], dtype=Weight)
+        self.hidden_weights = np.array([[[0, 0],[0, 0]], [[0, 0],[0, 0]]], dtype=Weight)
+        self.output_weights = np.array([[0, 0],[0, 0]], dtype=Weight)
+
         print(f"Graia model with {self.parameters} parameters ready.")
 
 
-    def fit(self, xs: Inputs, ys: Outputs, epochs: int):
-        return g.fit(self.weights["input"], self.weights["hidden"], self.weights["output"], xs, ys, np.int32(epochs))
+    def fit(self, xs: NDArray[InputVal], ys: NDArray[OutputVal], epochs: int):
+        # xs2 = np.array([[255, 0], [0, 255], [0, 0], [255, 255], [200, 0], [0, 200]], dtype=InputVal)
+        # ys2 = np.array([1, 2, 3, 4, 5, 6], dtype=OutputVal)
+        return g.fit(
+            self.input_weights, self.hidden_weights, self.output_weights,
+            xs, ys, np.int32(epochs)
+        )
