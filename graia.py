@@ -29,8 +29,8 @@ class ModelWeights(TypedDict):
 class Graia:
     def __init__(self,
                 inputs: int,
-                layers: int,
                 layer_neurons: int,
+                layers: int,
                 outputs: int,
                 # TODO
                 neuron_dendrites=0,
@@ -44,8 +44,8 @@ class Graia:
 
         self.config : dict = {
             "inputs": inputs,
-            "layers": layers,
             "layer_neurons": layer_neurons,
+            "layers": layers,
             "outputs": outputs,
             # "neuron_dentrites": neuron_dendrites,
         }
