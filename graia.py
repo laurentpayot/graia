@@ -50,5 +50,5 @@ class Graia:
         print(f"Graia model with {self.parameters} parameters ready.")
 
 
-    def fit (self, xs: NDArray[np.uint8], ys: NDArray[np.uint8], epochs: int):
+    def fit(self, xs: NDArray[np.uint8], ys: NDArray[np.uint8], epochs: int):
         return g.fit(xs, ys, np.int32(epochs))
