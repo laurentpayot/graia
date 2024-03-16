@@ -24,10 +24,10 @@ type OutputWs [o][n] = [o][n]Weight
 
 entry fit [r][i][n][lmo][o]
   (inputWs: InputWs [n][i]) (hiddenWs: HiddenWs [lmo][n]) (outputWs: OutputWs [o][n])
-  ( xs: [r][i]InputVal) (ys: [r]OutputVal) (epochs: i32)
-  : (InputWs [n][i], HiddenWs [lmo][n], OutputWs [o][n]) =
+  ( xs: [r][i]InputVal) (ys: [r]OutputVal)
+  : (InputWs [n][i], HiddenWs [lmo][n], OutputWs [o][n], f16) =
   -- TODO
-  (inputWs, hiddenWs, outputWs)
+  (inputWs, hiddenWs, outputWs, 0.0)
 
 entry predict (x: i32): i32 =
   x + 42

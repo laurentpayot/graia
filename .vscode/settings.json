@@ -5,6 +5,7 @@
         "Graia",
         "MNIST",
         "ndarray",
+        "opencl",
         "pocl",
         "pyopencl"
     ]
