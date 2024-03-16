@@ -16,8 +16,9 @@ print("Graia initializing…")
 g = graia.graia()
 print("Graia ready.\n")
 
+Weight: TypeAlias = np.int8
 
-Weights: TypeAlias = NDArray[np.int8]
+Weights: TypeAlias = NDArray[Weight]
 Inputs: TypeAlias = NDArray[np.uint8]
 Outputs: TypeAlias = NDArray[np.uint8]
 
@@ -54,12 +55,12 @@ class Graia:
         # A weight of n is actually the inverse of 2 at the power of n (right shift by abs(n) - 1)
         # Weights are negative for inhibition, positive for excitation, zero for no connection
         self.weights : ModelWeights = {
-            "input": np.array([[0],[0]], dtype=np.int8),
-            "hidden": np.array([[0],[0]], dtype=np.int8),
-            "output": np.array([[0],[0]], dtype=np.int8),
+            "input": np.array([[0, 0],[0, 0]], dtype=Weight),
+            "hidden": np.array([[[0, 0],[0, 0]]], dtype=Weight),
+            "output": np.array([[0, 0],[0, 0]], dtype=Weight),
         }
         print(f"Graia model with {self.parameters} parameters ready.")
 
 
     def fit(self, xs: Inputs, ys: Outputs, epochs: int):
-        return g.fit(xs, ys, np.int32(epochs))
+        return g.fit(self.weights["input"], self.weights["hidden"], self.weights["output"], xs, ys, np.int32(epochs))
