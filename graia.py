@@ -58,8 +58,6 @@ class Graia:
 
 
     def fit(self, xs: NDArray[InputVal], ys: NDArray[OutputVal], epochs: int):
-        # xs2 = np.array([[255, 0], [0, 255], [0, 0], [255, 255], [200, 0], [0, 200]], dtype=InputVal)
-        # ys2 = np.array([1, 2, 3, 4, 5, 6], dtype=OutputVal)
         return g.fit(
             self.input_weights, self.hidden_weights, self.output_weights,
             xs, ys, np.int32(epochs)
