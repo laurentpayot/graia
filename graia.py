@@ -1,4 +1,4 @@
-# from typing import Tuple
+from typing import TypeAlias, TypedDict
 import numpy as np
 from numpy.typing import NDArray
 import subprocess
@@ -16,6 +16,15 @@ print("Graia initializing…")
 g = graia.graia()
 print("Graia ready.\n")
 
+
+Weights: TypeAlias = NDArray[np.int8]
+Inputs: TypeAlias = NDArray[np.uint8]
+Outputs: TypeAlias = NDArray[np.uint8]
+
+class ModelWeights(TypedDict):
+    input: Weights
+    hidden: Weights
+    output: Weights
 
 class Graia:
     def __init__(self,
@@ -44,11 +53,13 @@ class Graia:
         # TODO
         # A weight of n is actually the inverse of 2 at the power of n (right shift by abs(n) - 1)
         # Weights are negative for inhibition, positive for excitation, zero for no connection
-        self.input_weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
-        self.hidden_weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
-        self.output_weights: NDArray[np.int8] = np.array([[0],[0]], dtype=np.int8)
+        self.weights : ModelWeights = {
+            "input": np.array([[0],[0]], dtype=np.int8),
+            "hidden": np.array([[0],[0]], dtype=np.int8),
+            "output": np.array([[0],[0]], dtype=np.int8),
+        }
         print(f"Graia model with {self.parameters} parameters ready.")
 
 
-    def fit(self, xs: NDArray[np.uint8], ys: NDArray[np.uint8], epochs: int):
+    def fit(self, xs: Inputs, ys: Outputs, epochs: int):
         return g.fit(xs, ys, np.int32(epochs))
