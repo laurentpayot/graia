@@ -32,6 +32,7 @@ class Graia:
         layer_neurons: int,
         layers: int,
         outputs: int,
+        weight_range: int = 6,  # maximum 6
         # TODO
         # neuron_dendrites=0,
     ) -> None:
@@ -47,17 +48,40 @@ class Graia:
             "layer_neurons": layer_neurons,
             "layers": layers,
             "outputs": outputs,
+            "weight_range": weight_range,
             # "neuron_dentrites": neuron_dendrites,
         }
 
-        # TODO
+        rng = np.random.default_rng()
 
-        self.input_weights = np.array([[0, 0], [0, 0]], dtype=Weight)
-        self.hidden_weights = np.array(
-            [[[0, 0], [0, 0]], [[0, 0], [0, 0]]], dtype=Weight
+        self.input_weights = rng.integers(
+            low=-weight_range,
+            high=weight_range,
+            size=(inputs, layer_neurons),
+            dtype=Weight,
+            endpoint=True,
         )
-        self.output_weights = np.array([[0, 0], [0, 0]], dtype=Weight)
-
+        self.hidden_weights = rng.integers(
+            low=-weight_range,
+            high=weight_range,
+            size=(layers - 1, layer_neurons, layer_neurons),
+            dtype=Weight,
+            endpoint=True,
+        )
+        self.output_weights = rng.integers(
+            low=-weight_range,
+            high=weight_range,
+            size=(layer_neurons, outputs),
+            dtype=Weight,
+            endpoint=True,
+        )
+        print(
+            self.input_weights.shape,
+            " -> ",
+            self.hidden_weights.shape,
+            " -> ",
+            self.output_weights.shape,
+        )
         print(f"Graia model with {self.parameters} parameters ready.")
 
     def fit(self, xs: NDArray[InputVal], ys: NDArray[OutputVal], epochs: int) -> None:
