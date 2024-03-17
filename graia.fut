@@ -4,7 +4,8 @@ type InputVal = u8
 type HiddenVal = u8
 type OutputVal = u8
 
-type Weight = i8
+-- W = weight
+type W = i8
 
 -- i = inputs
 -- n = neurons per layer
@@ -12,22 +13,28 @@ type Weight = i8
 -- lmo = layers minus one
 -- r = rows
 
-type InputWs [n][i] = [n][i]Weight
-type HiddenWs [lmo][n] = [lmo][n][n]Weight
-type OutputWs [o][n] = [o][n]Weight
+type Model [i][n][lmo][o] = {
+  inputWs: [n][i]W,
+  hiddenWs: [lmo][n][n]W,
+  outputWs: [o][n]W
+}
 
--- type Weights [i][n][lmo][o] = {
---   input: InputWs [n][i],
---   hidden: HiddenWs [lmo][n],
---   output: OutputWs [o][n] ,
--- }
+def feedForward [i][n][lmo][o]
+  (model: Model [i][n][lmo][o]) (x: [i]InputVal) : (Model [i][n][lmo][o], OutputVal) =
+  -- TODO
+  (model, 0)
 
 entry fit [r][i][n][lmo][o]
-  (inputWs: InputWs [n][i]) (hiddenWs: HiddenWs [lmo][n]) (outputWs: OutputWs [o][n])
+  (inputWs: [n][i]W) (hiddenWs: [lmo][n][n]W) (outputWs: [o][n]W)
   ( xs: [r][i]InputVal) (ys: [r]OutputVal)
-  : (InputWs [n][i], HiddenWs [lmo][n], OutputWs [o][n], f16) =
+  : ([n][i]W, [lmo][n][n]W, [o][n]W, f16) =
   -- TODO
-  (inputWs, hiddenWs, outputWs, 0.0)
+  let model: Model [i][n][lmo][o] = {
+    inputWs = inputWs,
+    hiddenWs = hiddenWs,
+    outputWs =outputWs
+  } in
+  (model.inputWs, model.hiddenWs, model.outputWs, 0.0)
 
 entry predict (x: i32): i32 =
   x + 42
