@@ -1,10 +1,8 @@
 -- Graia
 
-type InputVal = u8
-type HiddenVal = u8
-type OutputVal = u8
-
--- W = weight
+-- V = Value (input, hidden and output)
+type V = u8
+-- W = Weight
 type W = i8
 
 -- i = inputs
@@ -19,8 +17,18 @@ type Model [i][n][lmo][o] = {
   outputWs: [o][n]W
 }
 
+def signedRightShift (w: W) (v: V): i8 =
+  if w == 0 then 0 else
+    if w > 0 then v >> u8.i8 w else - (v >> (u8.i8 (-w)))
+
+def getOutput [j] (ws: [j]W) (is: [j]V) : V =
+  (zip ws is)
+  |> map (\(w,i) -> w*i)
+  foldl (+) 0
+
 def feedForward [i][n][lmo][o]
-  (model: Model [i][n][lmo][o]) (x: [i]InputVal) : (Model [i][n][lmo][o], OutputVal) =
+  (model: Model [i][n][lmo][o]) (wasGood: bool) (inputs: [i]InputVal)
+  : (Model [i][n][lmo][o], [o]OutputVal) =
   -- TODO
   (model, 0)
 
@@ -34,7 +42,11 @@ entry fit [r][i][n][lmo][o]
     hiddenWs = hiddenWs,
     outputWs =outputWs
   } in
-  (model.inputWs, model.hiddenWs, model.outputWs, 0.0)
+  zip xs ys
+  |> map (\x y -> feedForward model true x)
+
+
+  -- (model.inputWs, model.hiddenWs, model.outputWs, 0.0)
 
 entry predict (x: i32): i32 =
   x + 42
