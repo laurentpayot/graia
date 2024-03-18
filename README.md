@@ -15,5 +15,6 @@ To run Graia in a Jupyter Notebook on a Debian/Ubuntu system, you will need:
 
 ## TODO
 
-- save/load model https://numpy.org/devdocs/reference/generated/numpy.save.html
+- random weight initialization in GPU as CL array https://documen.tician.de/pyopencl/array.html#module-pyopencl.clrandom
+- save/load model https://documen.tician.de/pyopencl/array.html#pyopencl.array.Array.get then https://numpy.org/devdocs/reference/generated/numpy.save.html
 - tests
