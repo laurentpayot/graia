@@ -82,13 +82,24 @@ class Graia:
             " -> ",
             self.output_weights.shape,
         )
-        print(f"Graia model with {self.parameters} parameters ready.")
+        print(f"Graia model with {self.parameters} random parameters instantiated.")
 
-    def fit(self, xs: NDArray[InputVal], ys: NDArray[OutputVal], epochs: int) -> None:
+    def fit(
+        self,
+        xs: NDArray[InputVal],
+        ys: NDArray[OutputVal],
+        epochs: int,
+        learning_step=1,  # step of shift changes
+    ) -> None:
         for epoch in range(1, epochs):
             self.input_weights, self.hidden_weights, self.output_weights, precision = (
                 g.fit(
-                    self.input_weights, self.hidden_weights, self.output_weights, xs, ys
+                    self.input_weights,
+                    self.hidden_weights,
+                    self.output_weights,
+                    xs,
+                    ys,
+                    np.uint8(learning_step),
                 )
             )
             print(f"Epoch {epoch}/{epochs}: precision = {precision}")
