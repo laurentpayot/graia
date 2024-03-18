@@ -18,8 +18,15 @@ type Model [i][n][lmo][o] = {
 }
 
 def signedRightShift (w: W) (v: V): i8 =
-  if w == 0 then 0 else
-    if w > 0 then v >> u8.i8 w else - (v >> (u8.i8 (-w)))
+  -- (i8.sgn w) * i8.u8 (v >> u8.i8 (i8.abs w))
+  i8.u8 <|
+    if w == 0 then
+      0
+    else
+      if w > 0 then
+        v >> u8.i8  w
+      else
+        -(v >> u8.i8 (-w))
 
 def getOutput [j] (ws: [j]W) (is: [j]V) : V =
   (zip ws is)
