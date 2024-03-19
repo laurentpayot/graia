@@ -99,7 +99,7 @@ class Graia:
                     self.output_weights,
                     xs,
                     ys,
-                    np.uint8(learning_step),
+                    np.int8(learning_step),
                 )
             )
             print(f"Epoch {epoch}/{epochs}: precision = {precision}")

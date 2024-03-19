@@ -45,10 +45,12 @@ def activation (s: i16): Val =
     if s > 0 then u8.i16 (i16.min s 255) else 0
 
 -- changes weights between two layers
-def teachInter [k][j] (learningStep: u8) (wasGood: bool) (neuronInputWts: *[k][j]Wt) : [k][j]Wt =
-    -- TODO
-    neuronInputWts
-
+def teachInter [k][j] (learningStep: i8) (wasGood: bool) (neuronInputWts: *[k][j]Wt) : [k][j]Wt =
+    let delta: i8 = if wasGood then -learningStep else learningStep
+    in
+    loop neuronInputWts for neuron < k do
+        loop  neuronInputWts for input < j do
+            neuronInputWts with [neuron, input] = neuronInputWts[neuron, input] + delta
 
 -- value layer j -> neuron layer k
 def layerOutputs [k][j] (neuronInputWts: [k][j]Wt) (inputVals: [j]Val): [k]Val =
@@ -62,7 +64,7 @@ def layerOutputs [k][j] (neuronInputWts: [k][j]Wt) (inputVals: [j]Val): [k]Val =
 
 entry fit [r][i][n][lmo][o]
     (inputWts: *[n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
-    ( xs: [r][i]Val) (ys: [r]Val) (learningStep: u8)
+    ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, f16) =
     -- TODO
     let model: Model [i][n][lmo][o] = {
