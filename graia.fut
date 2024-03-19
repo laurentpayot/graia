@@ -44,8 +44,14 @@ def activation (s: i16): Val =
     -- ReLU
     if s > 0 then u8.i16 (i16.min s 255) else 0
 
+-- changes weights between two layers
+def teachInter [k][j] (learningStep: u8) (wasGood: bool) (neuronInputWts: *[k][j]Wt) : [k][j]Wt =
+    -- TODO
+    neuronInputWts
+
+
 -- value layer j -> neuron layer k
-def layerOutputs [k][j] (neuronInputWts: *[k][j]Wt) (inputVals: [j]Val): [k]Val =
+def layerOutputs [k][j] (neuronInputWts: [k][j]Wt) (inputVals: [j]Val): [k]Val =
     neuronInputWts
     |> map (\inputWts ->
         loop acc: i16 = 0 for (w, v) in zip inputWts inputVals do
