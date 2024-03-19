@@ -19,17 +19,15 @@ type Model [i][n][lmo][o] = {
 -- Val = Value of a neuron (input, hidden and output)
 type Val = u8
 
+-- -- Sum = Sum of ponderated values
+-- type Sum = i16
+-- def sumToVal = u8.i16
+-- def maxSum: Sum = 255
+
 
 def signedRightShift (w: Wt) (v: Val): i8 =
-    -- (i8.sgn w) * i8.u8 (v >> u8.i8 (i8.abs w))
-    i8.u8 <|
-        if w == 0 then
-            0
-        else
-            if w > 0 then
-                v >> u8.i8  w
-            else
-                -(v >> u8.i8 (-w))
+    (i8.sgn w) * i8.u8 (v >> u8.i8 (i8.abs w))
+
 
 -- def getOutput [j] (ws: [j]Wt) (is: [j]Val) : Val =
 --   (zip ws is)
@@ -41,6 +39,20 @@ def signedRightShift (w: Wt) (v: Val): i8 =
 --   : (Model [i][n][lmo][o], [o]Val) =
 --   -- TODO
 --   (model, 0)
+
+def activation (s: i16): Val =
+    -- ReLU
+    if s > 0 then u8.i16 (i16.min s 255) else 0
+
+-- value layer j -> neuron layer k
+def layerOutputs [k][j] (neuronInputWts: *[k][j]Wt) (inputVals: [j]Val): [k]Val =
+    neuronInputWts
+    |> map (\inputWts ->
+        loop acc: i16 = 0 for (w, v) in zip inputWts inputVals do
+            acc + (i16.i8 (signedRightShift w v))
+    )
+    |> map activation
+
 
 entry fit [r][i][n][lmo][o]
     (inputWts: *[n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
