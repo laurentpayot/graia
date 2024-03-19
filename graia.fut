@@ -50,6 +50,8 @@ def teachInter [k][j] (learningStep: i8) (wasGood: bool) (neuronInputWts: *[k][j
     in
     loop neuronInputWts for neuron < k do
         loop neuronInputWts for input < j do
+            -- TODO check weight sign instead of using delta
+            -- TODO handle 0 weight
             neuronInputWts with [neuron, input] = neuronInputWts[neuron, input] + delta
 
 -- value layer j -> neuron layer k
