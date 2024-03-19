@@ -49,7 +49,7 @@ def teachInter [k][j] (learningStep: i8) (wasGood: bool) (neuronInputWts: *[k][j
     let delta: i8 = if wasGood then -learningStep else learningStep
     in
     loop neuronInputWts for neuron < k do
-        loop  neuronInputWts for input < j do
+        loop neuronInputWts for input < j do
             neuronInputWts with [neuron, input] = neuronInputWts[neuron, input] + delta
 
 -- value layer j -> neuron layer k

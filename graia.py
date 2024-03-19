@@ -103,3 +103,6 @@ class Graia:
                 )
             )
             print(f"Epoch {epoch}/{epochs}: precision = {precision}")
+
+    # def teachInput(self) -> None:
+    #     g.teachInter(np.int8(1), False, self.input_weights)
