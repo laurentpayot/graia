@@ -6,7 +6,7 @@
 type Wt = i8
 
 -- i = inputs
--- n = neurons per layer
+-- n = nodes per layer
 -- o = outputs
 -- lmo = layers minus one
 -- r = rows
@@ -16,7 +16,7 @@ type Model [i][n][lmo][o] = {
     outputWts: [o][n]Wt
 }
 
--- Val = Value of a neuron (input, hidden and output)
+-- Val = Value of a node (input, hidden and output)
 type Val = u8
 
 -- -- Sum = Sum of ponderated values
@@ -45,18 +45,18 @@ def activation (s: i16): Val =
     if s > 0 then u8.i16 (i16.min s 255) else 0
 
 -- changes weights between two layers
-def teachInter [k][j] (learningStep: i8) (wasGood: bool) (neuronInputWts: *[k][j]Wt) : [k][j]Wt =
+def teachInter [k][j] (learningStep: i8) (wasGood: bool) (nodeInputWts: *[k][j]Wt) : [k][j]Wt =
     let delta: i8 = if wasGood then -learningStep else learningStep
     in
-    loop neuronInputWts for neuron < k do
-        loop neuronInputWts for input < j do
+    loop nodeInputWts for node < k do
+        loop nodeInputWts for input < j do
             -- TODO check weight sign instead of using delta
             -- TODO handle 0 weight
-            neuronInputWts with [neuron, input] = neuronInputWts[neuron, input] + delta
+            nodeInputWts with [node, input] = nodeInputWts[node, input] + delta
 
--- value layer j -> neuron layer k
-def layerOutputs [k][j] (neuronInputWts: [k][j]Wt) (inputVals: [j]Val): [k]Val =
-    neuronInputWts
+-- value layer j -> node layer k
+def layerOutputs [k][j] (nodeInputWts: [k][j]Wt) (inputVals: [j]Val): [k]Val =
+    nodeInputWts
     |> map (\inputWts ->
         loop acc: i16 = 0 for (w, v) in zip inputWts inputVals do
             acc + (i16.i8 (signedRightShift w v))

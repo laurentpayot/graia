@@ -29,27 +29,27 @@ class Graia:
     def __init__(
         self,
         inputs: int,
-        layer_neurons: int,
+        layer_nodes: int,
         layers: int,
         outputs: int,
         weight_range: int = 6,  # maximum 6
         # TODO
-        # neuron_dendrites=0,
+        # node_inputs=0,
     ) -> None:
 
         self.parameters: int = (
-            (inputs * layer_neurons)
-            + (layer_neurons * layer_neurons * (layers - 1))
-            + (layer_neurons * outputs)
+            (inputs * layer_nodes)
+            + (layer_nodes * layer_nodes * (layers - 1))
+            + (layer_nodes * outputs)
         )
 
         self.config: dict = {
             "inputs": inputs,
-            "layer_neurons": layer_neurons,
+            "layer_nodes": layer_nodes,
             "layers": layers,
             "outputs": outputs,
             "weight_range": weight_range,
-            # "neuron_dentrites": neuron_dendrites,
+            # "node_dentrites": node_inputs,
         }
 
         rng = np.random.default_rng()
@@ -57,21 +57,21 @@ class Graia:
         self.input_weights = rng.integers(
             low=-weight_range,
             high=weight_range,
-            size=(layer_neurons, inputs),
+            size=(layer_nodes, inputs),
             dtype=Weight,
             endpoint=True,
         )
         self.hidden_weights = rng.integers(
             low=-weight_range,
             high=weight_range,
-            size=(layers - 1, layer_neurons, layer_neurons),
+            size=(layers - 1, layer_nodes, layer_nodes),
             dtype=Weight,
             endpoint=True,
         )
         self.output_weights = rng.integers(
             low=-weight_range,
             high=weight_range,
-            size=(outputs, layer_neurons),
+            size=(outputs, layer_nodes),
             dtype=Weight,
             endpoint=True,
         )
