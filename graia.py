@@ -94,7 +94,7 @@ class Graia:
         for epoch in range(1, epochs):
             self.input_weights, self.hidden_weights, self.output_weights, precision = (
                 g.fit(
-                    np.int8(self.max_weight),
+                    np.int8(self.config["max_weight"]),
                     self.input_weights,
                     self.hidden_weights,
                     self.output_weights,
