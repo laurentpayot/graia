@@ -57,6 +57,10 @@ def outputs [k] [j] (interWts: [k][j]Wt) (inputs: [j]Val): [k]Val =
     )
     |> map activation
 
+
+-- ==
+-- entry: indexOfGreatest
+-- input { [3, 8, 11, 7] } output { 2 }
 let indexOfGreatest (ys: []u8) : i64 =
     let (_, index) =
         loop (greatestVal, index) = (0, 0) for i < length ys do
