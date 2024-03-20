@@ -33,7 +33,7 @@ def activation (s: i16): Val =
     if s > 0 then u8.i16 (i16.min s 255) else 0
 
 -- changes weights between two layers
-def teachInter [k][j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts: *[k][j]Wt) : [k][j]Wt =
+def teachInter [k] [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts: *[k][j]Wt) : [k][j]Wt =
     loop interWts for node < k do
         loop interWts for input < j do
             let wt = interWts[node, input]
@@ -49,7 +49,7 @@ def teachInter [k][j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts: 
 
 
 -- input layer with j nodes -> output layer with k nodes
-def outputs [k][j] (interWts: [k][j]Wt) (inputs: [j]Val): [k]Val =
+def outputs [k] [j] (interWts: [k][j]Wt) (inputs: [j]Val): [k]Val =
     interWts
     |> map (\inputWts ->
         loop acc: i16 = 0 for (w, v) in zip inputWts inputs do
@@ -57,6 +57,11 @@ def outputs [k][j] (interWts: [k][j]Wt) (inputs: [j]Val): [k]Val =
     )
     |> map activation
 
+let indexOfGreatest (ys: []u8) : i64 =
+    let (_, index) =
+        loop (greatestVal, index) = (0, 0) for i < length ys do
+            if ys[i] > greatestVal then (ys[i], i) else (greatestVal, index)
+    in index
 
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: *[n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
@@ -67,9 +72,9 @@ entry fit [r][i][n][lmo][o]
     --     hiddenWts = hiddenWts,
     --     outputWts =outputWts
     -- }
-    let teachInput [n][i] (wasGood: bool) (interWts: *[n][i]Wt) = teachInter maxWt learningStep
+    let teachInput [n] [i] (wasGood: bool) (interWts: *[n][i]Wt) = teachInter maxWt learningStep
     let teachHidden [n] (wasGood: bool) (interWts: *[n][n]Wt) = teachInter maxWt learningStep
-    let teachOutput [o][n] (wasGood: bool) (interWts: *[o][n]Wt) = teachInter maxWt learningStep
+    let teachOutput [o] [n] (wasGood: bool) (interWts: *[o][n]Wt) = teachInter maxWt learningStep
     let inputWts' = inputWts with [0, 0] = 42
     in
     -- zip xs ys |> map (\x y -> feedForward model true x)
