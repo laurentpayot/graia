@@ -5,10 +5,15 @@ import subprocess
 
 print("\n🌄 Graia v0.0.1\n")
 
+print("Graia running tests…")
+subprocess.run(["futhark", "test", "-i", "--pass-option=-w", "graia.fut"])
+
 print("Graia compiling…")
 subprocess.run(["mkdir", "-p", "lib"])
 subprocess.run(["touch", "lib/__init__.py"])
-subprocess.run(["futhark", "pyopencl", "--library", "-o", "lib/graia", "graia.fut"])
+subprocess.run(
+    ["futhark", "pyopencl", "--library", "-w", "-o", "lib/graia", "graia.fut"]
+)
 
 from lib import graia
 

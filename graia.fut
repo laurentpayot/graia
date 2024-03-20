@@ -60,7 +60,7 @@ def outputs [k] [j] (interWts: [k][j]Wt) (inputs: [j]Val): [k]Val =
 
 -- ==
 -- entry: indexOfGreatest
--- input { [3, 8, 11, 7] } output { 2 }
+-- input { [3u8, 8u8, 11u8, 7u8] } output { 2i64 }
 let indexOfGreatest (ys: []u8) : i64 =
     let (_, index) =
         loop (greatestVal, index) = (0, 0) for i < length ys do
