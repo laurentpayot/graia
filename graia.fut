@@ -28,29 +28,17 @@ type Val = u8
 def signedRightShift (w: Wt) (v: Val): i8 =
     (i8.sgn w) * i8.u8 (v >> u8.i8 (i8.abs w))
 
-
--- def getOutput [j] (ws: [j]Wt) (is: [j]Val) : Val =
---   (zip ws is)
---   |> map (\(w,i) -> w*i)
---   foldl (+) 0
-
--- def feedForward [i][n][lmo][o]
---   (model: Model [i][n][lmo][o]) (wasGood: bool) (inputs: [i]Val)
---   : (Model [i][n][lmo][o], [o]Val) =
---   -- TODO
---   (model, 0)
-
 def activation (s: i16): Val =
     -- ReLU
     if s > 0 then u8.i16 (i16.min s 255) else 0
 
 -- changes weights between two layers
-def teachInter [k][j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (nodeInputWts: *[k][j]Wt) : [k][j]Wt =
-    loop nodeInputWts for node < k do
-        loop nodeInputWts for input < j do
-            let wt = nodeInputWts[node, input]
+def teachInter [k][j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts: *[k][j]Wt) : [k][j]Wt =
+    loop interWts for node < k do
+        loop interWts for input < j do
+            let wt = interWts[node, input]
             in
-            nodeInputWts with [node, input] =
+            interWts with [node, input] =
                 if wt == 0 then
                     if wasGood then maxWt else -maxWt
                 else
@@ -61,8 +49,8 @@ def teachInter [k][j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (nodeInputW
 
 
 -- input layer with j nodes -> output layer with k nodes
-def outputs [k][j] (nodeInputWts: [k][j]Wt) (inputs: [j]Val): [k]Val =
-    nodeInputWts
+def outputs [k][j] (interWts: [k][j]Wt) (inputs: [j]Val): [k]Val =
+    interWts
     |> map (\inputWts ->
         loop acc: i16 = 0 for (w, v) in zip inputWts inputs do
             acc + (i16.i8 (signedRightShift w v))
@@ -74,12 +62,14 @@ entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: *[n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, f16) =
-    -- TODO
-    let model: Model [i][n][lmo][o] = {
-        inputWts = inputWts,
-        hiddenWts = hiddenWts,
-        outputWts =outputWts
-    }
+    -- let model: Model [i][n][lmo][o] = {
+    --     inputWts = inputWts,
+    --     hiddenWts = hiddenWts,
+    --     outputWts =outputWts
+    -- }
+    let teachInput [n][i] (wasGood: bool) (interWts: *[n][i]Wt) = teachInter maxWt learningStep
+    let teachHidden [n] (wasGood: bool) (interWts: *[n][n]Wt) = teachInter maxWt learningStep
+    let teachOutput [o][n] (wasGood: bool) (interWts: *[o][n]Wt) = teachInter maxWt learningStep
     let inputWts' = inputWts with [0, 0] = 42
     in
     -- zip xs ys |> map (\x y -> feedForward model true x)
