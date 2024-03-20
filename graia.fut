@@ -45,27 +45,33 @@ def activation (s: i16): Val =
     if s > 0 then u8.i16 (i16.min s 255) else 0
 
 -- changes weights between two layers
-def teachInter [k][j] (learningStep: i8) (wasGood: bool) (nodeInputWts: *[k][j]Wt) : [k][j]Wt =
-    let delta: i8 = if wasGood then -learningStep else learningStep
-    in
+def teachInter [k][j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (nodeInputWts: *[k][j]Wt) : [k][j]Wt =
     loop nodeInputWts for node < k do
         loop nodeInputWts for input < j do
-            -- TODO check weight sign instead of using delta
-            -- TODO handle 0 weight
-            nodeInputWts with [node, input] = nodeInputWts[node, input] + delta
+            let wt = nodeInputWts[node, input]
+            in
+            nodeInputWts with [node, input] =
+                if wt == 0 then
+                    if wasGood then maxWt else -maxWt
+                else
+                    if wt > 0 then
+                        if wasGood then wt - learningStep else wt + learningStep
+                    else
+                        if wasGood then wt + learningStep else wt - learningStep
 
--- value layer j -> node layer k
-def layerOutputs [k][j] (nodeInputWts: [k][j]Wt) (inputVals: [j]Val): [k]Val =
+
+-- input layer with j nodes -> output layer with k nodes
+def outputs [k][j] (nodeInputWts: [k][j]Wt) (inputs: [j]Val): [k]Val =
     nodeInputWts
     |> map (\inputWts ->
-        loop acc: i16 = 0 for (w, v) in zip inputWts inputVals do
+        loop acc: i16 = 0 for (w, v) in zip inputWts inputs do
             acc + (i16.i8 (signedRightShift w v))
     )
     |> map activation
 
 
 entry fit [r][i][n][lmo][o]
-    (inputWts: *[n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
+    (maxWt: i8) (inputWts: *[n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, f16) =
     -- TODO

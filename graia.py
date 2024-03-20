@@ -32,7 +32,7 @@ class Graia:
         layer_nodes: int,
         layers: int,
         outputs: int,
-        weight_range: int = 6,  # maximum 6
+        max_weight: int = 6,  # maximum 6 for unsigned 8 bit integers
         # TODO
         # node_inputs=0,
     ) -> None:
@@ -48,29 +48,29 @@ class Graia:
             "layer_nodes": layer_nodes,
             "layers": layers,
             "outputs": outputs,
-            "weight_range": weight_range,
+            "max_weight": max_weight,
             # "node_dentrites": node_inputs,
         }
 
         rng = np.random.default_rng()
 
         self.input_weights = rng.integers(
-            low=-weight_range,
-            high=weight_range,
+            low=-max_weight,
+            high=max_weight,
             size=(layer_nodes, inputs),
             dtype=Weight,
             endpoint=True,
         )
         self.hidden_weights = rng.integers(
-            low=-weight_range,
-            high=weight_range,
+            low=-max_weight,
+            high=max_weight,
             size=(layers - 1, layer_nodes, layer_nodes),
             dtype=Weight,
             endpoint=True,
         )
         self.output_weights = rng.integers(
-            low=-weight_range,
-            high=weight_range,
+            low=-max_weight,
+            high=max_weight,
             size=(outputs, layer_nodes),
             dtype=Weight,
             endpoint=True,
@@ -94,6 +94,7 @@ class Graia:
         for epoch in range(1, epochs):
             self.input_weights, self.hidden_weights, self.output_weights, precision = (
                 g.fit(
+                    np.int8(self.max_weight),
                     self.input_weights,
                     self.hidden_weights,
                     self.output_weights,
