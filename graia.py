@@ -1,26 +1,14 @@
 from typing import TypeAlias
 import numpy as np
 from numpy.typing import NDArray
-import subprocess
-
-print("\n🌄 Graia v0.0.1\n")
-
-print("Graia running tests…")
-subprocess.run(["futhark", "test", "-i", "--pass-option=-w", "graia.fut"])
-
-print("Graia compiling…")
-subprocess.run(["mkdir", "-p", "lib"])
-subprocess.run(["touch", "lib/__init__.py"])
-subprocess.run(
-    ["futhark", "pyopencl", "--library", "-w", "-o", "lib/graia", "graia.fut"]
-)
-
 from lib import graia
 
+VERSION = "0.0.1"
+
+print(f"\n🌄 Graia v{VERSION}\n")
 print("Graia initializing…")
 g = graia.graia()
 print("Graia ready.\n")
-
 
 # A weight of n is actually the inverse of 2 at the power of n (right shift by abs(n) - 1)
 # Weights are negative for inhibition, positive for excitation, zero for no connection
@@ -49,6 +37,7 @@ class Graia:
         )
 
         self.config: dict = {
+            "version": VERSION,
             "inputs": inputs,
             "layer_nodes": layer_nodes,
             "layers": layers,
