@@ -1,6 +1,7 @@
 lib/graia.py: graia.fut
 	@echo "Graia tests running…"
-	@futhark test -i --pass-option=-w graia.fut
+	@futhark test --interpreted --no-terminal graia.fut
+	@rm -f *.expected *.actual
 	@echo "Graia compiling to Python OpenCL library…"
 	@mkdir -p lib
 	@touch lib/__init__.py
