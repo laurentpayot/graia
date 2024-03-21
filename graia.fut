@@ -67,6 +67,11 @@ let indexOfGreatest (ys: []u8) : i64 =
             if ys[i] > greatestVal then (ys[i], i) else (greatestVal, index)
     in index
 
+def isGood [k] [j] (interWts: [k][j]Wt) (inputs: [j]Val) (y: Val): bool =
+    outputs interWts inputs
+    |> indexOfGreatest
+    |> (==) (i64.u8 y)
+
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: *[n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
@@ -80,11 +85,13 @@ entry fit [r][i][n][lmo][o]
     let teachHidden [n] (wasGood: bool) (interWts: *[n][n]Wt) = teachInter maxWt learningStep
     let teachOutput [o] [n] (wasGood: bool) (interWts: *[o][n]Wt) = teachInter maxWt learningStep
     let inputWts' = inputWts with [0, 0] = 42
+    let inputLayerOutputs = outputs [n] [i] inputWts xs
     in
-    -- zip xs ys |> map (\x y -> feedForward model true x)
+    zip xs ys
+    |> map (\x y -> outputs inputWts x )
 
 
-    (inputWts', hiddenWts, outputWts, 0.0)
+    -- (inputWts', hiddenWts, outputWts, 0.0)
 
     entry predict (x: i32): i32 =
         x + 42
