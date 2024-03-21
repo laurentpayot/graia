@@ -88,9 +88,19 @@ entry fit [r][i][n][lmo][o]
     let teachHidden [n] (wasGood: bool) (interWts: *[n][n]Wt) = teachInter maxWt learningStep
     let teachOutput [o] [n] (wasGood: bool) (interWts: *[o][n]Wt) = teachInter maxWt learningStep
     in
+    zip xs ys
+    |> map (\(x, y) ->
+        let wasGood = isGood inputWts hiddenWts outputWts x y
+        let inputWts' = teachInput wasGood inputWts
+        let hiddenWts' = hiddenWts |> map (\wts -> teachHidden wasGood wts)
+        let outputWts' = teachOutput wasGood outputWts
+        in
+        -- TODO !!!!
+    )
 
 
-    (inputWts, hiddenWts, outputWts, 0.0)
+    -- (inputWts, hiddenWts, outputWts, 0.0)
 
+-- TODO
 entry predict (x: i32): i32 =
     x + 42
