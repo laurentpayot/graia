@@ -83,17 +83,16 @@ entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, f16) =
-    zip xs ys
-    |> (reduce (\(x, y) goodAnswers ->
+    loop (iWts, hWts, oWts, goodAnswers) = (inputWts, hiddenWts, outputWts, 0) for (x, y) in zip xs ys do
         let wasGood = isGood inputWts hiddenWts outputWts x y
         in
-        ( teachInter maxWt learningStep wasGood inputWts
-        , hiddenWts |> map (\wts -> teachInter maxWt learningStep wasGood wts)
-        , teachInter maxWt learningStep wasGood outputWts
+        ( teachInter maxWt learningStep wasGood iWts
+        , hWts |> map (\wts -> teachInter maxWt learningStep wasGood wts)
+        , teachInter maxWt learningStep wasGood oWts
         , goodAnswers + if wasGood then 1 else 0)
-        ) 0)
-    |> (\(inputWts', hiddenWts', outputWts', goodAnswers) ->
-        (inputWts', hiddenWts', outputWts', goodAnswers / r))
+
+    |> (\(iWts, hWts, oWts, goodAnswers) ->
+        (iWts, hWts, oWts, goodAnswers / (f16.i64 r)))
 
 -- TODO
 entry predict (x: i32): i32 =
