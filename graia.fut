@@ -31,7 +31,7 @@ def teachInter [k] [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts:
 -- input { -1i8 200u8 } output { -100i16 }
 -- input { -2i8 200u8 } output { -50i16 }
 def signedRightShift (w: Wt) (v: Val): i16 =
-    -- (i8.sgn w) * i8.u8 (v >> u8.i8 (i8.abs w))
+    -- (i16.sgn w) * i16.u8 (v >> u8.i8 (i8.abs w))
     if w == 0 then
         0
     else
