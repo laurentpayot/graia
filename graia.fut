@@ -89,7 +89,8 @@ entry fit [r][i][n][lmo][o]
         ( teachInter maxWt learningStep wasGood iWts
         , hWts |> map (\wts -> teachInter maxWt learningStep wasGood wts)
         , teachInter maxWt learningStep wasGood oWts
-        , goodAnswers + if wasGood then 1 else 0)
+        , goodAnswers + if wasGood then 1 else 0
+        )
 
     |> (\(iWts, hWts, oWts, goodAnswers) ->
         (iWts, hWts, oWts, goodAnswers / (f16.i64 r)))
