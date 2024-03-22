@@ -85,8 +85,8 @@ class Graia:
         epochs: int,
         learning_step=1,  # step of shift changes
     ) -> None:
-        for epoch in range(1, epochs):
-            self.input_weights, self.hidden_weights, self.output_weights, precision = (
+        for epoch in range(1, epochs + 1):
+            self.input_weights, self.hidden_weights, self.output_weights, correct = (
                 g.fit(
                     np.int8(self.config["max_weight"]),
                     self.input_weights,
@@ -97,7 +97,7 @@ class Graia:
                     np.int8(learning_step),
                 )
             )
-            print(f"Epoch {epoch}/{epochs}: precision = {precision}")
+            print(f"Epoch {epoch}/{epochs}: correct = {correct}")
 
     # def teachInput(self) -> None:
     #     g.teachInter(np.int8(1), False, self.input_weights)

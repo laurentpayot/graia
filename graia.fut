@@ -8,21 +8,21 @@ type Wt = i8
 -- Val = Value of a node (input, hidden and output)
 type Val = u8
 
--- changes weights between layers
-def teachInter [l] [k] [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts: *[l][k][j]Wt) : [l][k][j]Wt =
-    loop interWts for layer < l do
-        loop interWts for node < k do
-            loop interWts for input < j do
-                let wt = interWts[layer, node, input]
-                in
-                interWts with [layer, node, input] =
-                    if wt == 0 then
-                        if wasGood then maxWt else -maxWt
-                    else
-                        if wt > 0 then
-                            if wasGood then wt - learningStep else wt + learningStep
-                        else
-                            if wasGood then wt + learningStep else wt - learningStep
+-- changes weights between two layers
+def teachInter [k] [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts: [k][j]Wt) : [k][j]Wt =
+    interWts
+    |> map (\nodeWts ->
+        nodeWts
+        |> map (\wt ->
+            if wt == 0 then
+                if wasGood then maxWt else -maxWt
+            else
+                if wt > 0 then
+                    if wasGood then wt - learningStep else wt + learningStep
+                else
+                    if wasGood then wt + learningStep else wt - learningStep
+        )
+    )
 
 -- ==
 -- entry: signedRightShift
@@ -83,18 +83,15 @@ def isGood [i][n][lmo][o]
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
-    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, f16) =
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32) =
     loop (iWts, hWts, oWts, goodAnswers) = (inputWts, hiddenWts, outputWts, 0) for (x, y) in zip xs ys do
         let wasGood = isGood inputWts hiddenWts outputWts x y
         in
-        ( (teachInter maxWt learningStep wasGood [iWts])[0]
-        , teachInter maxWt learningStep wasGood hWts
-        , (teachInter maxWt learningStep wasGood [oWts])[0]
+        ( teachInter maxWt learningStep wasGood iWts
+        , hWts |> map (\wts -> teachInter maxWt learningStep wasGood wts)
+        , teachInter maxWt learningStep wasGood oWts
         , goodAnswers + if wasGood then 1 else 0
         )
-
-    |> (\(iWts, hWts, oWts, goodAnswers) ->
-        (iWts, hWts, oWts, goodAnswers / (f16.i64 r)))
 
 -- TODO
 entry predict (x: i32): i32 =
