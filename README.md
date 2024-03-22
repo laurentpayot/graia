@@ -21,6 +21,7 @@ To be sure to have all the Python packages needed, [Anaconda](https://docs.anaco
 ## TODO
 
 - change the weights at the same time the outputs are computed
+- find a way to use in-place updates to change the weights
 - random weight initialization in GPU as CL array https://documen.tician.de/pyopencl/array.html#module-pyopencl.clrandom
 - save/load model https://documen.tician.de/pyopencl/array.html#pyopencl.array.Array.get then https://numpy.org/devdocs/reference/generated/numpy.save.html
 - tests
