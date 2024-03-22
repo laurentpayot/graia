@@ -10,7 +10,7 @@ print("Graia initializing…")
 g = graia.graia()
 print("Graia ready.\n")
 
-# A weight of n is actually the inverse of 2 at the power of n (right shift by abs(n) - 1)
+# A weight of n is actually the division by 2 at the power of n (right shift by abs(n))
 # Weights are negative for inhibition, positive for excitation, zero for no connection
 Weight: TypeAlias = np.int8
 
