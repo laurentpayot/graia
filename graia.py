@@ -1,6 +1,7 @@
 from typing import TypeAlias
 import numpy as np
 from numpy.typing import NDArray
+
 from lib import graia
 
 VERSION = "0.0.1"
