@@ -8,20 +8,21 @@ type Wt = i8
 -- Val = Value of a node (input, hidden and output)
 type Val = u8
 
--- changes weights between two layers
-def teachInter [k] [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts: *[k][j]Wt) : [k][j]Wt =
-    loop interWts for node < k do
-        loop interWts for input < j do
-            let wt = interWts[node, input]
-            in
-            interWts with [node, input] =
-                if wt == 0 then
-                    if wasGood then maxWt else -maxWt
-                else
-                    if wt > 0 then
-                        if wasGood then wt - learningStep else wt + learningStep
+-- changes weights between layers
+def teachInter [l] [k] [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts: *[l][k][j]Wt) : [l][k][j]Wt =
+    loop interWts for layer < l do
+        loop interWts for node < k do
+            loop interWts for input < j do
+                let wt = interWts[layer, node, input]
+                in
+                interWts with [layer, node, input] =
+                    if wt == 0 then
+                        if wasGood then maxWt else -maxWt
                     else
-                        if wasGood then wt + learningStep else wt - learningStep
+                        if wt > 0 then
+                            if wasGood then wt - learningStep else wt + learningStep
+                        else
+                            if wasGood then wt + learningStep else wt - learningStep
 
 -- ==
 -- entry: signedRightShift
@@ -86,9 +87,9 @@ entry fit [r][i][n][lmo][o]
     loop (iWts, hWts, oWts, goodAnswers) = (inputWts, hiddenWts, outputWts, 0) for (x, y) in zip xs ys do
         let wasGood = isGood inputWts hiddenWts outputWts x y
         in
-        ( teachInter maxWt learningStep wasGood iWts
-        , hWts |> map (\wts -> teachInter maxWt learningStep wasGood wts)
-        , teachInter maxWt learningStep wasGood oWts
+        ( (teachInter maxWt learningStep wasGood [iWts])[0]
+        , teachInter maxWt learningStep wasGood hWts
+        , (teachInter maxWt learningStep wasGood [oWts])[0]
         , goodAnswers + if wasGood then 1 else 0
         )
 
