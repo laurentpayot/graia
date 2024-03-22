@@ -74,36 +74,30 @@ def isGood [i][n][lmo][o]
     |> (==) (i64.u8 y)
 
 
--- -- i = inputs
--- -- n = nodes per layer
--- -- o = outputs
--- -- lmo = layers minus one
--- -- r = rows
--- entry fit [r][i][n][lmo][o]
---     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
---     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
---     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, f16) =
---     -- let model: Model [i][n][lmo][o] = {
---     --     inputWts = inputWts,
---     --     hiddenWts = hiddenWts,
---     --     outputWts =outputWts
---     -- }
---     let teachInput [n] [i] (wasGood: bool) (interWts: *[n][i]Wt) = teachInter maxWt learningStep
---     let teachHidden [n] (wasGood: bool) (interWts: *[n][n]Wt) = teachInter maxWt learningStep
---     let teachOutput [o] [n] (wasGood: bool) (interWts: *[o][n]Wt) = teachInter maxWt learningStep
---     in
---     zip xs ys
---     |> map (\(x, y) ->
---         let wasGood = isGood inputWts hiddenWts outputWts x y
---         let inputWts' = teachInput wasGood inputWts
---         let hiddenWts' = hiddenWts |> map (\wts -> teachHidden wasGood wts)
---         let outputWts' = teachOutput wasGood outputWts
---         in
---         -- TODO !!!!
---     )
-
-
---     -- (inputWts, hiddenWts, outputWts, 0.0)
+-- i = inputs
+-- n = nodes per layer
+-- o = outputs
+-- lmo = layers minus one
+-- r = rows
+entry fit [r][i][n][lmo][o]
+    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
+    ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, f16) =
+    let teachInput [n] [i] (wasGood: bool) (interWts: *[n][i]Wt) = teachInter maxWt learningStep
+    let teachHidden [n] (wasGood: bool) (interWts: *[n][n]Wt) = teachInter maxWt learningStep
+    let teachOutput [o] [n] (wasGood: bool) (interWts: *[o][n]Wt) = teachInter maxWt learningStep
+    in
+    zip xs ys
+    |> (reduce (\(x, y) goodAnswers ->
+        let wasGood = isGood inputWts hiddenWts outputWts x y
+        let inputWts' = teachInput wasGood inputWts
+        let hiddenWts' = hiddenWts |> map (\wts -> teachHidden wasGood wts)
+        let outputWts' = teachOutput wasGood outputWts
+        in
+        (inputWts', hiddenWts', outputWts', goodAnswers + if wasGood then 1 else 0)
+        ) 0)
+    |> (\(inputWts', hiddenWts', outputWts', goodAnswers) ->
+        (inputWts', hiddenWts', outputWts', goodAnswers / r))
 
 -- TODO
 entry predict (x: i32): i32 =
