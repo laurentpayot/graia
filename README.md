@@ -18,6 +18,8 @@ Then simply run `make` to test and compile the Futhark files to the OpenCL libra
 ## Jupyter Notebooks
 
 To be sure to have all the Python packages needed, [Anaconda](https://docs.anaconda.com/free/anaconda/install/linux/) is highly recommended.
+- Install [PoCL](http://portablecl.org/):`conda install conda-forge::pocl`
+- Install [Futhark FFI](https://github.com/pepijndevos/futhark-pycffi): `pip install futhark-ffi`
 
 ## TODO
 
