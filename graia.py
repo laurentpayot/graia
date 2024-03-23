@@ -1,14 +1,15 @@
 from typing import TypeAlias
 import numpy as np
 from numpy.typing import NDArray
+from futhark_ffi import Futhark
 
-from lib import graia
+from lib import _graia
 
 VERSION = "0.0.1"
 
 print(f"\n🌄 Graia v{VERSION}\n")
 print("Graia initializing…")
-g = graia.graia()
+graia = Futhark(_graia)
 print("Graia ready.\n")
 
 # A weight of n is actually the division by 2 at the power of n (right shift by abs(n))
@@ -87,16 +88,17 @@ class Graia:
         learning_step=1,  # step of shift changes
     ) -> None:
         for epoch in range(1, epochs + 1):
+            result = graia.fit(
+                np.int8(self.config["max_weight"]),
+                self.input_weights,
+                self.hidden_weights,
+                self.output_weights,
+                xs,
+                ys,
+                np.int8(learning_step),
+            )
             self.input_weights, self.hidden_weights, self.output_weights, correct = (
-                g.fit(
-                    np.int8(self.config["max_weight"]),
-                    self.input_weights,
-                    self.hidden_weights,
-                    self.output_weights,
-                    xs,
-                    ys,
-                    np.int8(learning_step),
-                )
+                graia.from_futhark(result)
             )
             print(f"Epoch {epoch}/{epochs}: correct = {correct}")
 

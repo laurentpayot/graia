@@ -5,5 +5,6 @@ lib/graia.py: graia.fut
 	@echo "Graia compiling to Python OpenCL library…"
 	@mkdir -p lib
 	@touch lib/__init__.py
-	@futhark pyopencl --library -w -o lib/graia graia.fut
+	@futhark opencl --library -w -o lib/graia graia.fut
+	@build_futhark_ffi lib/graia
 	@echo "OK"
