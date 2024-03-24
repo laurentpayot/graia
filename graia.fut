@@ -24,6 +24,15 @@ def teachInter [k] [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts:
         )
     )
 
+def changeWt (maxWt: i8) (learningStep: i8) (wasGood: bool) (wt: Wt) : Wt =
+    if wt == 0 then
+        if wasGood then maxWt else -maxWt
+    else
+        if wt > 0 then
+            if wasGood then wt - learningStep else wt + learningStep
+        else
+            if wasGood then wt + learningStep else wt - learningStep
+
 -- ==
 -- entry: signedRightShift
 -- input { 0i8 200u8 } output { 0i16 }
@@ -45,6 +54,18 @@ def activation (s: i16): Val =
     -- ReLU
     if s > 0 then u8.i16 (i16.min s 255) else 0
 
+
+def nodeOps [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (inputWts: [j]Wt) (inputs: [j]Val):
+    ([j]Wt, Val) =
+    zip inputWts inputs
+    |> map (\(w, v) ->
+        let w' = changeWt maxWt learningStep wasGood w
+        in
+        (w', (signedRightShift w' v))
+    )
+    |> unzip
+    |> \(wts, wtVals) -> (wts, reduce (+) 0 wtVals)
+    |> \(wts, sum) -> (wts, activation sum)
 
 -- input layer with j nodes -> output layer with k nodes
 def outputs [k] [j] (interWts: [k][j]Wt) (inputs: [j]Val): [k]Val =
