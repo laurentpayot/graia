@@ -65,16 +65,6 @@ let indexOfGreatest (ys: []u8) : i64 =
             if ys[i] > greatestVal then (ys[i], i) else (greatestVal, index)
     in index
 
-def isGood [i][n][lmo][o]
-    (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
-    (x: [i]Val) (y: Val): bool =
-    (loop inputs = outputs inputWts x for k < lmo do
-        outputs hiddenWts[k] inputs)
-    |> outputs outputWts
-    |> indexOfGreatest
-    |> (==) (i64.u8 y)
-
-
 -- i = inputs
 -- n = nodes per layer
 -- o = outputs
@@ -83,14 +73,22 @@ def isGood [i][n][lmo][o]
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
-    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32) =
-    loop (iWts, hWts, oWts, goodAnswers) = (inputWts, hiddenWts, outputWts, 0) for (x, y) in zip xs ys do
-        let wasGood = isGood inputWts hiddenWts outputWts x y
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, []Val) =
+    loop (iWts, hWts, oWts, goodAnswers, _) = (inputWts, hiddenWts, outputWts, 0, []) for (x, y) in zip xs ys do
+        let outputVals =
+            (loop inputs = outputs inputWts x for k < lmo do
+                outputs hiddenWts[k] inputs)
+            |> outputs outputWts
+        let wasGood =
+            outputVals
+            |> indexOfGreatest
+            |> (==) (i64.u8 y)
         in
         ( teachInter maxWt learningStep wasGood iWts
         , hWts |> map (\wts -> teachInter maxWt learningStep wasGood wts)
         , teachInter maxWt learningStep wasGood oWts
         , goodAnswers + if wasGood then 1 else 0
+        , outputVals
         )
 
 -- TODO
