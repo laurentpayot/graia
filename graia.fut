@@ -8,6 +8,12 @@ type Wt = i8
 -- Val = Value of a node (input, hidden and output)
 type Val = u8
 
+type TeachCfg = {
+    maxWt: i8,
+    learningStep: i8,
+    wasGood: bool
+}
+
 -- changes weights between two layers
 def teachInter [k] [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts: [k][j]Wt) : [k][j]Wt =
     interWts
@@ -24,7 +30,9 @@ def teachInter [k] [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts:
         )
     )
 
-def changeWt (maxWt: i8) (learningStep: i8) (wasGood: bool) (wt: Wt) : Wt =
+def changeWt (teachCfg: TeachCfg) (wt: Wt) : Wt =
+    let { maxWt, learningStep, wasGood } = teachCfg
+    in
     if wt == 0 then
         if wasGood then maxWt else -maxWt
     else
@@ -54,12 +62,11 @@ def activation (s: i16): Val =
     -- ReLU
     if s > 0 then u8.i16 (i16.min s 255) else 0
 
-
-def nodeOps [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (inputWts: [j]Wt) (inputs: [j]Val):
+def nodeOps [j] (teachCfg: TeachCfg) (inputs: [j]Val) (inputWts: [j]Wt):
     ([j]Wt, Val) =
     zip inputWts inputs
     |> map (\(w, v) ->
-        let w' = changeWt maxWt learningStep wasGood w
+        let w' = changeWt teachCfg w
         in
         (w', (signedRightShift w' v))
     )
@@ -75,6 +82,12 @@ def outputs [k] [j] (interWts: [k][j]Wt) (inputs: [j]Val): [k]Val =
             acc + (signedRightShift w v)
     )
     |> map activation
+
+-- input layer with j nodes -> output layer with k nodes
+def outputs2 [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (inputs: [j]Val): ([k][j]Wt, [k]Val) =
+    interWts
+    |> map (nodeOps teachCfg inputs)
+    |> unzip
 
 -- ==
 -- entry: indexOfGreatest
