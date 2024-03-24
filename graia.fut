@@ -108,7 +108,11 @@ entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, []Val) =
+    let teachCfg: TeachCfg = { maxWt = maxWt, learningStep = learningStep, wasGood = false }
+    in
     loop (iWts, hWts, oWts, goodAnswers, _) = (inputWts, hiddenWts, outputWts, 0, []) for (x, y) in zip xs ys do
+        let (iWts', iVals) = outputs2 teachCfg iWts x
+        -- TODO !!!!!!!!!!!!!!!!!!!
         let outputVals =
             (loop inputs = outputs inputWts x for k < lmo do
                 outputs hiddenWts[k] inputs)
