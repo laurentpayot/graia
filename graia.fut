@@ -138,10 +138,10 @@ def scanner [n] (teachCfg: TeachCfg) (a: ([n][n]Wt, [n]Val)) (b: ([n][n]Wt, [n]V
 entry fit2 [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
-    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, []Val) =
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, []Val, [][]Val ) =
     let teachCfg: TeachCfg = { maxWt = maxWt, learningStep = learningStep, wasGood = false }
     in
-    (loop (iWts, hWtsLayers, oWts, goodAnswers, teachCfg, _) = (inputWts, hiddenWtsLayers, outputWts, 0, teachCfg, []) for (x, y) in zip xs ys do
+    (loop (iWts, hWtsLayers, oWts, goodAnswers, teachCfg, _, _) = (inputWts, hiddenWtsLayers, outputWts, 0, teachCfg, [], [[]]) for (x, y) in zip xs ys do
         let (iWts', iOutputs) = outputs2 teachCfg iWts x
         -- let (hWts', hOutputs) =
         --     (loop (_, layerInputs) = (hWts, iOutputs) for layer < lmo do
@@ -168,10 +168,11 @@ entry fit2 [r][i][n][lmo][o]
         , goodAnswers + if wasGood then 1 else 0
         , { learningStep = teachCfg.learningStep, maxWt = teachCfg.maxWt, wasGood = wasGood }
         , oOutputs
+        , hOutputsLayers
         )
     )
-    |> (\(iWts, hWts, oWts, goodAnswers, _, lastOutputs) ->
-        (iWts, hWts, oWts, goodAnswers, lastOutputs)
+    |> (\(iWts, hWtsLayers, oWts, goodAnswers, _, lastOutputs, lastIntermediateOutputs) ->
+        (iWts, hWtsLayers, oWts, goodAnswers, lastOutputs, lastIntermediateOutputs)
     )
 
 -- TODO

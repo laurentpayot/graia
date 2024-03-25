@@ -72,6 +72,9 @@ class Graia:
             endpoint=True,
         )
         self.last_outputs = np.zeros((outputs), dtype=np.uint8)
+        self.last_intermediate_outputs = np.zeros(
+            (layers - 1, layer_nodes), dtype=np.uint8
+        )
         print(
             self.input_weights.shape,
             " -> ",
@@ -89,21 +92,29 @@ class Graia:
         learning_step=1,  # step of shift changes
     ) -> None:
         for epoch in range(1, epochs + 1):
-            input_weights, hidden_weights, output_weights, correct, last_outputs = (
-                graia.fit(
-                    np.int8(self.config["max_weight"]),
-                    self.input_weights,
-                    self.hidden_weights,
-                    self.output_weights,
-                    xs,
-                    ys,
-                    np.int8(learning_step),
-                )
+            (
+                input_weights,
+                hidden_weights,
+                output_weights,
+                correct,
+                last_outputs,
+                last_intermediate_outputs,
+            ) = graia.fit(
+                np.int8(self.config["max_weight"]),
+                self.input_weights,
+                self.hidden_weights,
+                self.output_weights,
+                xs,
+                ys,
+                np.int8(learning_step),
             )
             self.input_weights = graia.from_futhark(input_weights)
             self.hidden_weights = graia.from_futhark(hidden_weights)
             self.output_weights = graia.from_futhark(output_weights)
             self.last_outputs = graia.from_futhark(last_outputs)
+            self.last_intermediate_outputs = graia.from_futhark(
+                last_intermediate_outputs
+            )
             print(f"Epoch {epoch}/{epochs}: correct = {correct}")
 
     # def teachInput(self) -> None:
