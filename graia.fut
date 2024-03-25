@@ -130,7 +130,7 @@ entry fit2 [r][i][n][lmo][o]
     : ([n][i]Wt, *[lmo][n][n]Wt, [o][n]Wt, i32, []Val) =
     let teachCfg: TeachCfg = { maxWt = maxWt, learningStep = learningStep, wasGood = false }
     in
-    loop (iWts, hWts, oWts, goodAnswers, teachCfg, _) = (inputWts, hiddenWts, outputWts, 0, teachCfg, []) for (x, y) in zip xs ys do
+    (loop (iWts, hWts, oWts, goodAnswers, teachCfg, _) = (inputWts, hiddenWts, outputWts, 0, teachCfg, []) for (x, y) in zip xs ys do
         let (iWts', iVals) = outputs2 teachCfg iWts x
         let (oWts', oVals) =
             (loop (wts, inputs) = (hWts, iVals) for layer < lmo do
@@ -153,6 +153,7 @@ entry fit2 [r][i][n][lmo][o]
         , { learningStep = teachCfg.learningStep, maxWt = teachCfg.maxWt, wasGood = wasGood }
         , oVals
         )
+    )
     |> (\(iWts, hWts, oWts, goodAnswers, _, lastOutputs) -> (iWts, hWts, oWts, goodAnswers, lastOutputs))
 
 -- TODO
