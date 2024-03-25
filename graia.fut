@@ -94,8 +94,8 @@ entry fit [r][i][n][lmo][o]
         let (iWts', iOutputs) = outputs teachCfg iWts x
         let (hWtsLayers', hOutputsLayers) =
             scan (scanner teachCfg)
-                (tabulate_2d n n (\_ _ -> 0), iOutputs)
-                (zip hWtsLayers (tabulate_2d lmo n (\_ _ -> 0)))
+                (tabulate_2d n n (\_ _ -> 0i8), iOutputs)
+                (zip hWtsLayers (tabulate_2d lmo n (\_ _ -> 0u8)))
             |> unzip
         let (oWts', oOutputs) =
             outputs teachCfg oWts hOutputsLayers[lmo - 1]
