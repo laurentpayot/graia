@@ -124,37 +124,43 @@ entry fit [r][i][n][lmo][o]
         , outputVals
         )
 
+
+def setInterWts [lmo] [n] (hiddenLayers: *[lmo][n][n]Wt) (i: i64) (interWts: [n][n]Wt): *[lmo][n][n]Wt =
+  hiddenLayers with [i] = interWts
+
 entry fit2 [r][i][n][lmo][o]
-    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: *[lmo][n][n]Wt) (outputWts: [o][n]Wt)
+    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
-    : ([n][i]Wt, *[lmo][n][n]Wt, [o][n]Wt, i32, []Val) =
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, []Val) =
     let teachCfg: TeachCfg = { maxWt = maxWt, learningStep = learningStep, wasGood = false }
     in
     (loop (iWts, hWts, oWts, goodAnswers, teachCfg, _) = (inputWts, hiddenWts, outputWts, 0, teachCfg, []) for (x, y) in zip xs ys do
-        let (iWts', iVals) = outputs2 teachCfg iWts x
-        let (oWts', oVals) =
-            (loop (wts, inputs) = (hWts, iVals) for layer < lmo do
-                outputs2 teachCfg wts[layer] inputs
-                |> (\(layerWts, layerOutputs) ->
-                    (hiddenWts with [layer] = layerWts, layerOutputs)
+        let (iWts', iOutputs) = outputs2 teachCfg iWts x
+        let (hWts', hOutputs) =
+            (loop (interWtsLayers, layerInputs) = (hWts, iOutputs) for layer < lmo do
+                outputs2 teachCfg interWtsLayers[layer] layerInputs
+                |> (\(layerNewInterWts, layerOutputs) ->
+                    (setInterWts interWtsLayers layer layerNewInterWts, layerOutputs)
                 )
             )
-            |> (\(_, outputs) -> outputs)
-            |> outputs2 teachCfg oWts
+        let (oWts', oOutputs) =
+            outputs2 teachCfg oWts hOutputs
         let wasGood =
-            oVals
+            oOutputs
             |> indexOfGreatest
             |> (==) (i64.u8 y)
         in
         ( iWts'
-        , hWts
+        , hWts'
         , oWts'
         , goodAnswers + if wasGood then 1 else 0
         , { learningStep = teachCfg.learningStep, maxWt = teachCfg.maxWt, wasGood = wasGood }
-        , oVals
+        , oOutputs
         )
     )
-    |> (\(iWts, hWts, oWts, goodAnswers, _, lastOutputs) -> (iWts, hWts, oWts, goodAnswers, lastOutputs))
+    |> (\(iWts, hWts, oWts, goodAnswers, _, lastOutputs) ->
+        (iWts, hWts, oWts, goodAnswers, lastOutputs)
+    )
 
 -- TODO
 entry predict (x: i32): i32 =
