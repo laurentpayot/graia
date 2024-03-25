@@ -128,30 +128,42 @@ entry fit [r][i][n][lmo][o]
 def setInterWts [lmo] [n] (hiddenLayers: *[lmo][n][n]Wt) (i: i64) (interWts: [n][n]Wt): *[lmo][n][n]Wt =
   hiddenLayers with [i] = interWts
 
+def scanner [k] [j] (teachCfg: TeachCfg) (a: ([k][j]Wt, [k]Val)) (b: ([k][k]Wt, [k]Val)) : ([k][k]Wt, [k]Val) =
+    let (_, aVals) = a
+    let (bWts, _) = b
+    in
+    outputs2 teachCfg bWts aVals
+
+
 entry fit2 [r][i][n][lmo][o]
-    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: *[lmo][n][n]Wt) (outputWts: [o][n]Wt)
+    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
-    : ([n][i]Wt, *[lmo][n][n]Wt, [o][n]Wt, i32, []Val) =
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, []Val) =
     let teachCfg: TeachCfg = { maxWt = maxWt, learningStep = learningStep, wasGood = false }
     in
-    (loop (iWts, hWts, oWts, goodAnswers, teachCfg, _) = (inputWts, hiddenWts, outputWts, 0, teachCfg, []) for (x, y) in zip xs ys do
+    (loop (iWts, hWtsLayers, oWts, goodAnswers, teachCfg, _) = (inputWts, hiddenWtsLayers, outputWts, 0, teachCfg, []) for (x, y) in zip xs ys do
         let (iWts', iOutputs) = outputs2 teachCfg iWts x
-        let (hWts', hOutputs) =
-            (loop (_, layerInputs) = (hWts, iOutputs) for layer < lmo do
-                outputs2 teachCfg hWts[layer] layerInputs
-                |> (\(layerNewInterWts, layerOutputs) ->
-                    (setInterWts hiddenWts layer layerNewInterWts, layerOutputs)
-                )
-            )
+        -- let (hWts', hOutputs) =
+        --     (loop (_, layerInputs) = (hWts, iOutputs) for layer < lmo do
+        --         outputs2 teachCfg hWts[layer] layerInputs
+        --         |> (\(layerNewInterWts, layerOutputs) ->
+        --             (setInterWts hiddenWts layer layerNewInterWts, layerOutputs)
+        --         )
+        --     )
+
+
+        let (hWtsLayers', hOutputsLayers) =
+            scan (scanner teachCfg) (iWts', iOutputs) (hWtsLayers |> map (\wts -> (wts, tabulate n (\_ -> 0))))
+            |> unzip
         let (oWts', oOutputs) =
-            outputs2 teachCfg oWts hOutputs
+            outputs2 teachCfg oWts hOutputsLayers[lmo - 1]
         let wasGood =
             oOutputs
             |> indexOfGreatest
             |> (==) (i64.u8 y)
         in
         ( iWts'
-        , hWts'
+        , hWtsLayers'
         , oWts'
         , goodAnswers + if wasGood then 1 else 0
         , { learningStep = teachCfg.learningStep, maxWt = teachCfg.maxWt, wasGood = wasGood }
