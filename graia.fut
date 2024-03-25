@@ -93,7 +93,8 @@ entry fit [r][i][n][lmo][o]
     (loop (iWts, hWtsLayers, oWts, goodAnswers, teachCfg, _, _) = (inputWts, hiddenWtsLayers, outputWts, 0, teachCfg, [], [[]]) for (x, y) in zip xs ys do
         let (iWts', iOutputs) = outputs teachCfg iWts x
         let (hWtsLayers', hOutputsLayers) =
-            scan (scanner teachCfg)
+            -- (hWtsLayers, tabulate_2d lmo n (\_ _ -> 0u8))
+            scan (\a b -> outputs teachCfg b.0 a.1)
                 (tabulate_2d n n (\_ _ -> 0i8), iOutputs)
                 (zip hWtsLayers (tabulate_2d lmo n (\_ _ -> 0u8)))
             |> unzip
