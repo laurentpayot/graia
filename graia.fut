@@ -14,22 +14,6 @@ type TeachCfg = {
     wasGood: bool
 }
 
--- changes weights between two layers
-def teachInter [k] [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts: [k][j]Wt) : [k][j]Wt =
-    interWts
-    |> map (\nodeWts ->
-        nodeWts
-        |> map (\wt ->
-            if wt == 0 then
-                if wasGood then maxWt else -maxWt
-            else
-                if wt > 0 then
-                    if wasGood then wt - learningStep else wt + learningStep
-                else
-                    if wasGood then wt + learningStep else wt - learningStep
-        )
-    )
-
 def changeWt (teachCfg: TeachCfg) (wt: Wt) : Wt =
     let { maxWt, learningStep, wasGood } = teachCfg
     in
@@ -74,16 +58,7 @@ def nodeOps [j] (teachCfg: TeachCfg) (inputs: [j]Val) (inputWts: [j]Wt): ([j]Wt,
     |> \(wts, sum) -> (wts, activation sum)
 
 -- input layer with j nodes -> output layer with k nodes
-def outputs [k] [j] (interWts: [k][j]Wt) (inputs: [j]Val): [k]Val =
-    interWts
-    |> map (\inputWts ->
-        loop acc: i16 = 0 for (w, v) in zip inputWts inputs do
-            acc + (signedRightShift w v)
-    )
-    |> map activation
-
--- input layer with j nodes -> output layer with k nodes
-def outputs2 [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (inputs: [j]Val): ([k][j]Wt, [k]Val) =
+def outputs [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (inputs: [j]Val): ([k][j]Wt, [k]Val) =
     interWts
     |> map (nodeOps teachCfg inputs)
     |> unzip
@@ -98,39 +73,17 @@ let indexOfGreatest (ys: []u8) : i64 =
             if ys[i] > greatestVal then (ys[i], i) else (greatestVal, index)
     in index
 
+def scanner [n] (teachCfg: TeachCfg) (a: ([n][n]Wt, [n]Val)) (b: ([n][n]Wt, [n]Val)) : ([n][n]Wt, [n]Val) =
+    let (_, aVals) = a
+    let (bWts, _) = b
+    in
+    outputs teachCfg bWts aVals
+
 -- i = inputs
 -- n = nodes per layer
 -- o = outputs
 -- lmo = layers minus one
 -- r = rows
-entry fit0 [r][i][n][lmo][o]
-    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
-    ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
-    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, []Val) =
-    loop (iWts, hWts, oWts, goodAnswers, _) = (inputWts, hiddenWts, outputWts, 0, []) for (x, y) in zip xs ys do
-        let outputVals =
-            (loop inputs = outputs inputWts x for k < lmo do
-                outputs hiddenWts[k] inputs)
-            |> outputs outputWts
-        let wasGood =
-            outputVals
-            |> indexOfGreatest
-            |> (==) (i64.u8 y)
-        in
-        ( teachInter maxWt learningStep wasGood iWts
-        , hWts |> map (\wts -> teachInter maxWt learningStep wasGood wts)
-        , teachInter maxWt learningStep wasGood oWts
-        , goodAnswers + if wasGood then 1 else 0
-        , outputVals
-        )
-
-def scanner [n] (teachCfg: TeachCfg) (a: ([n][n]Wt, [n]Val)) (b: ([n][n]Wt, [n]Val)) : ([n][n]Wt, [n]Val) =
-    let (_, aVals) = a
-    let (bWts, _) = b
-    in
-    outputs2 teachCfg bWts aVals
-
-
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
@@ -138,12 +91,12 @@ entry fit [r][i][n][lmo][o]
     let teachCfg: TeachCfg = { maxWt = maxWt, learningStep = learningStep, wasGood = false }
     in
     (loop (iWts, hWtsLayers, oWts, goodAnswers, teachCfg, _, _) = (inputWts, hiddenWtsLayers, outputWts, 0, teachCfg, [], [[]]) for (x, y) in zip xs ys do
-        let (iWts', iOutputs) = outputs2 teachCfg iWts x
+        let (iWts', iOutputs) = outputs teachCfg iWts x
         let (hWtsLayers', hOutputsLayers) =
             scan (scanner teachCfg) ((tabulate n (\_ -> tabulate n (\_ -> 0))), iOutputs) (hWtsLayers |> map (\hWts -> (hWts, tabulate n (\_ -> 0))))
             |> unzip
         let (oWts', oOutputs) =
-            outputs2 teachCfg oWts hOutputsLayers[lmo - 1]
+            outputs teachCfg oWts hOutputsLayers[lmo - 1]
         let wasGood =
             oOutputs
             |> indexOfGreatest
