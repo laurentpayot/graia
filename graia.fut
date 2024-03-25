@@ -125,8 +125,8 @@ entry fit [r][i][n][lmo][o]
         )
 
 
-def setInterWts [lmo] [n] (hiddenLayers: *[lmo][n][n]Wt) (i: i64) (interWts: [n][n]Wt): *[lmo][n][n]Wt =
-  hiddenLayers with [i] = interWts
+-- def setInterWts [lmo] [n] (hiddenLayers: *[lmo][n][n]Wt) (i: i64) (interWts: [n][n]Wt): *[lmo][n][n]Wt =
+--   hiddenLayers with [i] = interWts
 
 def scanner [k] [j] (teachCfg: TeachCfg) (a: ([k][j]Wt, [k]Val)) (b: ([k][k]Wt, [k]Val)) : ([k][k]Wt, [k]Val) =
     let (_, aVals) = a
@@ -153,7 +153,7 @@ entry fit2 [r][i][n][lmo][o]
 
 
         let (hWtsLayers', hOutputsLayers) =
-            scan (scanner teachCfg) (iWts', iOutputs) (hWtsLayers |> map (\wts -> (wts, tabulate n (\_ -> 0))))
+            scan (scanner teachCfg) (iWts', iOutputs) (hWtsLayers |> map (\hWts -> (hWts, tabulate n (\_ -> 0))))
             |> unzip
         let (oWts', oOutputs) =
             outputs2 teachCfg oWts hOutputsLayers[lmo - 1]
