@@ -103,7 +103,7 @@ let indexOfGreatest (ys: []u8) : i64 =
 -- o = outputs
 -- lmo = layers minus one
 -- r = rows
-entry fit [r][i][n][lmo][o]
+entry fit0 [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, []Val) =
@@ -124,10 +124,6 @@ entry fit [r][i][n][lmo][o]
         , outputVals
         )
 
-
--- def setInterWts [lmo] [n] (hiddenLayers: *[lmo][n][n]Wt) (i: i64) (interWts: [n][n]Wt): *[lmo][n][n]Wt =
---   hiddenLayers with [i] = interWts
-
 def scanner [n] (teachCfg: TeachCfg) (a: ([n][n]Wt, [n]Val)) (b: ([n][n]Wt, [n]Val)) : ([n][n]Wt, [n]Val) =
     let (_, aVals) = a
     let (bWts, _) = b
@@ -135,7 +131,7 @@ def scanner [n] (teachCfg: TeachCfg) (a: ([n][n]Wt, [n]Val)) (b: ([n][n]Wt, [n]V
     outputs2 teachCfg bWts aVals
 
 
-entry fit2 [r][i][n][lmo][o]
+entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, []Val, [][]Val ) =
@@ -143,15 +139,6 @@ entry fit2 [r][i][n][lmo][o]
     in
     (loop (iWts, hWtsLayers, oWts, goodAnswers, teachCfg, _, _) = (inputWts, hiddenWtsLayers, outputWts, 0, teachCfg, [], [[]]) for (x, y) in zip xs ys do
         let (iWts', iOutputs) = outputs2 teachCfg iWts x
-        -- let (hWts', hOutputs) =
-        --     (loop (_, layerInputs) = (hWts, iOutputs) for layer < lmo do
-        --         outputs2 teachCfg hWts[layer] layerInputs
-        --         |> (\(layerNewInterWts, layerOutputs) ->
-        --             (setInterWts hiddenWts layer layerNewInterWts, layerOutputs)
-        --         )
-        --     )
-
-
         let (hWtsLayers', hOutputsLayers) =
             scan (scanner teachCfg) ((tabulate n (\_ -> tabulate n (\_ -> 0))), iOutputs) (hWtsLayers |> map (\hWts -> (hWts, tabulate n (\_ -> 0))))
             |> unzip
