@@ -73,7 +73,7 @@ let indexOfGreatest (ys: []u8) : i64 =
             if ys[i] > greatestVal then (ys[i], i) else (greatestVal, index)
     in index
 
-def scanner [n] (teachCfg: TeachCfg) (a: ([n][n]Wt, [n]Val)) (b: ([n][n]Wt, [n]Val)) : ([n][n]Wt, [n]Val) =
+def scanner [n] (teachCfg: TeachCfg) (a: ([n][n]Wt, [n]Val)) (b: ([n][n]Wt, [n]Val)): ([n][n]Wt, [n]Val) =
     let (_, aVals) = a
     let (bWts, _) = b
     in
@@ -94,7 +94,7 @@ entry fit [r][i][n][lmo][o]
         let (iWts', iOutputs) = outputs teachCfg iWts x
         let (hWtsLayers', hOutputsLayers) =
             -- (hWtsLayers, tabulate_2d lmo n (\_ _ -> 0u8))
-            scan (\a b -> outputs teachCfg b.0 a.1)
+            scan (\a b -> outputs teachCfg b.0 a.1) -- (scanner teachCfg)
                 (tabulate_2d n n (\_ _ -> 0i8), iOutputs)
                 (zip hWtsLayers (tabulate_2d lmo n (\_ _ -> 0u8)))
             |> unzip
