@@ -28,9 +28,12 @@ class Graia:
         layers: int,
         outputs: int,
         max_weight: int = 6,  # maximum 6 for unsigned 8 bit integers
+        seed: int = None,
         # TODO
         # node_inputs=0,
     ) -> None:
+
+        rng = np.random.default_rng(seed)
 
         self.parameters: int = (
             (inputs * layer_nodes)
@@ -47,8 +50,6 @@ class Graia:
             "max_weight": max_weight,
             # "node_dentrites": node_inputs,
         }
-
-        rng = np.random.default_rng()
 
         self.input_weights = rng.integers(
             low=-max_weight,
