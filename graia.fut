@@ -47,11 +47,10 @@ def activation (s: i16): Val =
 
 
 -- input layer with j nodes -> output layer with k nodes
-def outputs [k] [j] (interWts: [k][j]Wt) (inputs: [j]Val): [k]Val =
+def outputs [k] [j] (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     interWts
     |> map (\inputWts ->
-        loop acc: i16 = 0 for (w, v) in zip inputWts inputs do
-            acc + (signedRightShift w v)
+        reduce (+) 0 (map2 signedRightShift inputWts inputs)
     )
     |> map activation
 
@@ -75,10 +74,9 @@ entry fit [r][i][n][lmo][o]
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, []Val) =
     loop (iWts, hWts, oWts, goodAnswers, _) = (inputWts, hiddenWts, outputWts, 0, []) for (x, y) in zip xs ys do
-        let outputVals =
-            (loop inputs = outputs inputWts x for k < lmo do
-                outputs hiddenWts[k] inputs)
-            |> outputs outputWts
+        let inputVals = outputs x iWts
+        let hiddenVals = foldl outputs inputVals hWts
+        let outputVals = outputs hiddenVals oWts
         let wasGood =
             outputVals
             |> indexOfGreatest
