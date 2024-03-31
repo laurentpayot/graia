@@ -80,8 +80,8 @@ let indexOfGreatest (ys: []u8) : i64 =
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
-    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, []Val) =
-    loop (iWts, hWts, oWts, goodAnswers, _) = (inputWts, hiddenWts, outputWts, 0, []) for (x, y) in zip xs ys do
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val) =
+    foldl (\(iWts, hWts, oWts, goodAnswers, _) (x, y) ->
         let inputVals = outputs x iWts
         let hiddenVals = foldl outputs inputVals hWts
         let outputVals = outputs hiddenVals oWts
@@ -97,6 +97,9 @@ entry fit [r][i][n][lmo][o]
         , goodAnswers + if isGood then 1 else 0
         , outputVals
         )
+    )
+    (inputWts, hiddenWts, outputWts, 0, (tabulate o (\_ -> 0u8)))
+    (zip xs ys)
 
 -- TODO
 entry predict (x: i32): i32 =
