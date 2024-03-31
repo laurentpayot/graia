@@ -8,8 +8,16 @@ type Wt = i8
 -- Val = Value of a node (input, hidden and output)
 type Val = u8
 
+type TeachCfg = {
+    maxWt: i8,
+    learningStep: i8,
+    wasGood: bool
+}
+
 -- changes weights between two layers
-def teachInter [k] [j] (maxWt: i8) (learningStep: i8) (wasGood: bool) (interWts: [k][j]Wt) : [k][j]Wt =
+def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
+    let { maxWt, learningStep, wasGood } = teachCfg
+    in
     interWts
     |> map (\nodeWts ->
         nodeWts
@@ -77,15 +85,16 @@ entry fit [r][i][n][lmo][o]
         let inputVals = outputs x iWts
         let hiddenVals = foldl outputs inputVals hWts
         let outputVals = outputs hiddenVals oWts
-        let wasGood =
+        let isGood =
             outputVals
             |> indexOfGreatest
             |> (==) (i64.u8 y)
+        let teachCfg = { maxWt, learningStep, wasGood = isGood }
         in
-        ( teachInter maxWt learningStep wasGood iWts
-        , hWts |> map (\wts -> teachInter maxWt learningStep wasGood wts)
-        , teachInter maxWt learningStep wasGood oWts
-        , goodAnswers + if wasGood then 1 else 0
+        ( teachInter teachCfg iWts
+        , hWts |> map (\wts -> teachInter teachCfg wts)
+        , teachInter teachCfg oWts
+        , goodAnswers + if isGood then 1 else 0
         , outputVals
         )
 
