@@ -65,6 +65,8 @@ def outputs [k] [j] (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     |> map (\inputWts ->
         reduce (+) 0 (map2 signedRightShift inputWts inputs)
     )
+    -- "boosting" the sum by an arbitrary factor of 64 before dividing by the number of input nodes
+    |> map (\s -> (s * 64) / i16.i64 j)
     |> map activation
 
 -- ==
