@@ -27,7 +27,7 @@ class Graia:
         layer_nodes: int,
         layers: int,
         outputs: int,
-        max_weight: int = 6,  # maximum 6 for unsigned 8 bit integers
+        max_weight: int = 7,  # maximum 7 for unsigned 8 bit integers
         seed: int = None,
         # TODO
         # node_inputs=0,
@@ -50,28 +50,16 @@ class Graia:
             "max_weight": max_weight,
             # "node_dentrites": node_inputs,
         }
-
-        self.input_weights = rng.integers(
-            low=-max_weight,
-            high=max_weight,
-            size=(layer_nodes, inputs),
-            dtype=Weight,
-            endpoint=True,
+        # no zero weights
+        wtsRange = np.concatenate(
+            (np.arange(-max_weight, 0), np.arange(1, (max_weight + 1))), dtype=Weight
         )
-        self.hidden_weights = rng.integers(
-            low=-max_weight,
-            high=max_weight,
-            size=(layers - 1, layer_nodes, layer_nodes),
-            dtype=Weight,
-            endpoint=True,
+        # print("Weights range:", wtsRange)
+        self.input_weights = rng.choice(wtsRange, size=(layer_nodes, inputs))
+        self.hidden_weights = rng.choice(
+            wtsRange, size=(layers - 1, layer_nodes, layer_nodes)
         )
-        self.output_weights = rng.integers(
-            low=-max_weight,
-            high=max_weight,
-            size=(outputs, layer_nodes),
-            dtype=Weight,
-            endpoint=True,
-        )
+        self.output_weights = rng.choice(wtsRange, size=(outputs, layer_nodes))
         self.last_outputs = np.zeros((outputs), dtype=np.uint8)
         print(
             self.input_weights.shape,

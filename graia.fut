@@ -22,13 +22,18 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
     |> map (\nodeWts ->
         nodeWts
         |> map (\wt ->
-            if wt == 0 then
-                if wasGood then maxWt else -maxWt
+            if wt == maxWt then
+                if wasGood then maxWt - learningStep else -maxWt
+            else if wt == -maxWt then
+                if wasGood then -maxWt + learningStep else maxWt
+            else if wt == 1 then
+                if wasGood then 1 else 1 + learningStep
+            else if wt == -1 then
+                if wasGood then -1 else -1 - learningStep
+            else if wt > 0 then
+                if wasGood then wt - learningStep else wt + learningStep
             else
-                if wt > 0 then
-                    if wasGood then wt - learningStep else wt + learningStep
-                else
-                    if wasGood then wt + learningStep else wt - learningStep
+                if wasGood then wt + learningStep else wt - learningStep
         )
     )
 
