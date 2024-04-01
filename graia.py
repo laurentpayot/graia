@@ -27,7 +27,7 @@ class Graia:
         layer_nodes: int,
         layers: int,
         outputs: int,
-        max_weight: int = 7,  # maximum 7 for unsigned 8 bit integers
+        max_weight: int = 8,  # maximum 8 for unsigned 8 bit integers
         seed: int = None,
         # TODO
         # node_inputs=0,
