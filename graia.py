@@ -93,7 +93,7 @@ class Graia:
             self.hidden_weights = graia.from_futhark(hidden_weights)
             self.output_weights = graia.from_futhark(output_weights)
             self.last_outputs = graia.from_futhark(last_outputs)
-            print(f"Epoch {epoch}/{epochs}: correct = {correct}")
+            print(f"Epoch {epoch}/{epochs}: accuracy {100 * correct / ys.size}%")
 
     # def teachInput(self) -> None:
     #     g.teachInter(np.int8(1), False, self.input_weights)
