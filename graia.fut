@@ -23,9 +23,9 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
         nodeWts
         |> map (\wt ->
             if wt == maxWt then
-                if wasGood then maxWt - learningStep else -maxWt + learningStep
+                if wasGood then maxWt - learningStep else -maxWt / 2
             else if wt == -maxWt then
-                if wasGood then -maxWt + learningStep else maxWt - learningStep
+                if wasGood then -maxWt + learningStep else maxWt / 2
             else if wt == 1 then
                 if wasGood then 1 else 1 + learningStep
             else if wt == -1 then
@@ -46,12 +46,10 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
 -- input { -2i8 200u8 } output { -50i16 }
 def signedRightShift (w: Wt) (v: Val): i16 =
     -- (i16.sgn w) * i16.u8 (v >> u8.i8 (i8.abs w))
-    let maxWt = 3i8 -- TODO pass as a parameter
-    in
     if w > 0 then
-        if w == maxWt then 0 else i16.u8 (v >> u8.i8 w)
+        i16.u8 (v >> u8.i8 w)
     else
-        if w == -maxWt then 0 else - i16.u8 (v >> u8.i8 (-w))
+        - i16.u8 (v >> u8.i8 (-w))
 
 def activation (s: i16): Val =
     -- ReLU
@@ -65,7 +63,8 @@ def outputs [k] [j] (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
         reduce (+) 0 (map2 signedRightShift inputWts inputs)
     )
     -- "boosting" the sum by an arbitrary factor of 64 before dividing by the number of input nodes
-     |> map (\s -> (s * 256) / i16.i64 j)
+    --  |> map (\s -> (s * 256) / i16.i64 j)
+     |> map (\s -> (s * 16) )
     |> map activation
 
 -- ==
