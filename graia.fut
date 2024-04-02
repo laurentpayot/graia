@@ -10,7 +10,7 @@ type Val = u8
 
 type TeachCfg = {
     maxWt: i8,
-    learningStep: i8,
+    excitingRatio: i8,
     wasGood: bool,
     loss: u8
 }
@@ -25,8 +25,8 @@ def getStep (maxWt: Wt) (loss: u8) : i8 =
 
 -- changes weights between two layers
 def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
-    let { maxWt, learningStep, wasGood, loss } = teachCfg
-    let step = (getStep maxWt loss) / 4
+    let { maxWt, excitingRatio, wasGood, loss } = teachCfg
+    let step = (getStep maxWt loss)
     in
     interWts
     |> map (\nodeWts ->
@@ -45,21 +45,26 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
 
 -- SKIP ==
 -- entry: signedRightShift
--- input { 0i8 200u8 } output { 0i16 }
--- input { 1i8 200u8 } output { 100i16 }
--- input { 2i8 200u8 } output { 50i16 }
--- input { -1i8 200u8 } output { -100i16 }
--- input { -2i8 200u8 } output { -50i16 }
-def signedRightShift (w: Wt) (v: Val): i16 =
-    -- (i16.sgn w) * i16.u8 (v >> u8.i8 (i8.abs w))
+-- input { 0i8 200u8 } output { 0 }
+-- input { 1i8 200u8 } output { 100 }
+-- input { 2i8 200u8 } output { 50 }
+-- input { -1i8 200u8 } output { -100 }
+-- input { -2i8 200u8 } output { -50 }
+def signedRightShift (w: Wt) (v: Val): i32 =
     if w > 0 then
-        i16.u8 (v >> u8.i8 w)
+        i32.u8 (v >> u8.i8 w) * 64
     else
-        - i16.u8 (v >> u8.i8 (-w))
+        - i32.u8 (v >> u8.i8 (-w))
 
-def activation (s: i16): Val =
+
+-- ==
+-- entry: activation
+-- input { 2i64 127 } output { 127u8 }
+-- input { 4i64 127 } output { 63u8 }
+def activation (inputs: i64) (s: i32): Val =
     -- ReLU
-    if s > 0 then u8.i16 (i16.min s 255) else 0
+    if s <= 0 then 0 else u8.i32 <|
+        (2 * s) / (i32.i64 inputs)
 
 
 -- input layer with j nodes -> output layer with k nodes
@@ -68,10 +73,7 @@ def outputs [k] [j] (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     |> map (\inputWts ->
         reduce (+) 0 (map2 signedRightShift inputWts inputs)
     )
-    -- "boosting" the sum by an arbitrary factor of 64 before dividing by the number of input nodes
-     |> map (\s -> (s * 256) / i16.i64 j)
-    --  |> map (\s -> (s * 16) )
-    |> map activation
+    |> map (activation j)
 
 -- ==
 -- entry: indexOfGreatest
@@ -105,7 +107,7 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 -- r = rows
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
-    ( xs: [r][i]Val) (ys: [r]Val) (learningStep: i8)
+    ( xs: [r][i]Val) (ys: [r]Val) (excitingRatio: i8)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val) =
     foldl (\(iWts, hWts, oWts, goodAnswers, _) (x, y) ->
         let inputVals = outputs x iWts
@@ -116,7 +118,7 @@ entry fit [r][i][n][lmo][o]
             |> indexOfGreatest
             |> (==) (i64.u8 y)
         let loss = getLoss outputVals (i64.u8 y)
-        let teachCfg = { maxWt, learningStep, wasGood, loss }
+        let teachCfg = { maxWt, excitingRatio, wasGood, loss }
         in
         ( teachInter teachCfg iWts
         , hWts |> map (\wts -> teachInter teachCfg wts)

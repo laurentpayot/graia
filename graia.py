@@ -75,7 +75,7 @@ class Graia:
         xs: NDArray[InputVal],
         ys: NDArray[OutputVal],
         epochs: int,
-        learning_step=1,  # step of shift changes
+        exciting_ratio=1,
     ) -> None:
         for epoch in range(1, epochs + 1):
             input_weights, hidden_weights, output_weights, correct, last_outputs = (
@@ -86,7 +86,7 @@ class Graia:
                     self.output_weights,
                     xs,
                     ys,
-                    np.int8(learning_step),
+                    np.int8(exciting_ratio),
                 )
             )
             self.input_weights = graia.from_futhark(input_weights)
