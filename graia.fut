@@ -71,11 +71,25 @@ def outputs [k] [j] (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
 -- entry: indexOfGreatest
 -- input { [3u8, 8u8, 11u8, 7u8] } output { 2i64 }
 -- input { [3u8, 8u8, 11u8, 11u8] } output { 2i64 }
-let indexOfGreatest (ys: []u8) : i64 =
+def indexOfGreatest (ys: []u8) : i64 =
     let (_, index) =
         loop (greatestVal, index) = (0, 0) for i < length ys do
             if ys[i] > greatestVal then (ys[i], i) else (greatestVal, index)
     in index
+
+-- ==
+-- entry: loss
+-- input { [0u8, 0u8, 255u8, 0u8] 2i64 } output { 0i32 }
+-- input { [255u8, 255u8, 0u8, 255u8] 2i64 } output { 255i32 }
+-- input { [0u8, 0u8, 255u8, 0u8] 1i64 } output { 127i32 }
+def loss [o] (outputVals: [o]Val) (correctIndex: i64) : i32 =
+    let idealOutputVals = tabulate o (\i -> if i == correctIndex then 255 else 0)
+    in
+    zip outputVals idealOutputVals
+    -- mean absolute error
+    |> map (\(out, ideal) -> i32.abs (i32.u8(out) - ideal))
+    |> reduce (+) 0
+    |> (\sum -> sum / i32.i64 o)
 
 -- i = inputs
 -- n = nodes per layer
