@@ -49,30 +49,29 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
 -- input { 2i8 200u8 } output { 50 }
 -- input { -1i8 200u8 } output { -100 }
 -- input { -2i8 200u8 } output { -50 }
-def signedRightShift (excitRatio: i32) (w: Wt) (v: Val): i32 =
+def signedRightShift (w: Wt) (v: Val): i32 =
     if w > 0 then
-        i32.u8 (v >> u8.i8 w) * excitRatio
+        i32.u8 (v >> u8.i8 w)
     else
         - i32.u8 (v >> u8.i8 (-w))
 
-
 -- ==
 -- entry: activation
--- input { 2i64 127 } output { 127u8 }
--- input { 4i64 127 } output { 63u8 }
-def activation (inputs: i64) (s: i32): Val =
+-- input { 2 2i64 127 } output { 127u8 }
+-- input { 2 4i64 127 } output { 63u8 }
+-- input { 8 4i64 127 } output { 254u8 }
+def activation (excitRatio: i32) (inputs: i64) (s: i32): Val =
     -- ReLU
-    if s <= 0 then 0 else u8.i32 <|
-        (2 * s) / (i32.i64 inputs)
-
+    if s <= 0 then 0 else u8.i32 <| i32.min 255 <|
+        (excitRatio * s) / (i32.i64 inputs)
 
 -- input layer with j nodes -> output layer with k nodes
 def outputs [k] [j] (excitRatio: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     interWts
     |> map (\inputWts ->
-        reduce (+) 0 (map2 (signedRightShift excitRatio) inputWts inputs)
+        reduce (+) 0 (map2 signedRightShift inputWts inputs)
     )
-    |> map (activation j)
+    |> map (activation excitRatio j)
 
 -- ==
 -- entry: indexOfGreatest
