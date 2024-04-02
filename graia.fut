@@ -11,21 +11,35 @@ type Val = u8
 type TeachCfg = {
     maxWt: i8,
     learningStep: i8,
-    wasGood: bool
+    wasGood: bool,
+    loss: u8
 }
 
 -- changes weights between two layers
 def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
-    let { maxWt, learningStep, wasGood } = teachCfg
+    let { maxWt, learningStep, wasGood, loss } = teachCfg
+    let limitWt = -- i32.max 0 <| maxWt -
+        if loss >= 127 then 1
+        else if loss >= 64 then 2
+        else if loss >= 32 then 3
+        else if loss >= 16 then 4
+        else if loss >= 8 then 5
+        else if loss >= 4 then 6
+        else if loss >= 2 then 7
+        else if loss >= 1 then 8
+        else 0
     in
     interWts
     |> map (\nodeWts ->
         nodeWts
         |> map (\wt ->
+            if i8.abs wt < limitWt then
+                wt
+            else
             if wt == maxWt then
-                if wasGood then maxWt - learningStep else -maxWt / 4
+                if wasGood then maxWt - learningStep else -maxWt + learningStep
             else if wt == -maxWt then
-                if wasGood then -maxWt + learningStep else maxWt / 4
+                if wasGood then -maxWt + learningStep else maxWt - learningStep
             else if wt == 1 then
                 if wasGood then 1 else 1 + learningStep
             else if wt == -1 then
@@ -78,11 +92,11 @@ def indexOfGreatest (ys: []u8) : i64 =
     in index
 
 -- ==
--- entry: loss
--- input { [0u8, 0u8, 255u8, 0u8] 2i64 } output { 0i32 }
--- input { [255u8, 255u8, 0u8, 255u8] 2i64 } output { 255i32 }
--- input { [0u8, 0u8, 255u8, 0u8] 1i64 } output { 127i32 }
-def loss [o] (outputVals: [o]Val) (correctIndex: i64) : i32 =
+-- entry: getLoss
+-- input { [0u8, 0u8, 255u8, 0u8] 2i64 } output { 0u8 }
+-- input { [255u8, 255u8, 0u8, 255u8] 2i64 } output { 255u8 }
+-- input { [0u8, 0u8, 255u8, 0u8] 1i64 } output { 127u8 }
+def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
     let idealOutputVals = tabulate o (\i -> if i == correctIndex then 255 else 0)
     in
     zip outputVals idealOutputVals
@@ -90,6 +104,7 @@ def loss [o] (outputVals: [o]Val) (correctIndex: i64) : i32 =
     |> map (\(out, ideal) -> i32.abs (i32.u8(out) - ideal))
     |> reduce (+) 0
     |> (\sum -> sum / i32.i64 o)
+    |> u8.i32
 
 -- i = inputs
 -- n = nodes per layer
@@ -104,16 +119,17 @@ entry fit [r][i][n][lmo][o]
         let inputVals = outputs x iWts
         let hiddenVals = foldl outputs inputVals hWts
         let outputVals = outputs hiddenVals oWts
-        let isGood =
+        let wasGood =
             outputVals
             |> indexOfGreatest
             |> (==) (i64.u8 y)
-        let teachCfg = { maxWt, learningStep, wasGood = isGood }
+        let loss = getLoss outputVals (i64.u8 y)
+        let teachCfg = { maxWt, learningStep, wasGood, loss }
         in
         ( teachInter teachCfg iWts
         , hWts |> map (\wts -> teachInter teachCfg wts)
         , teachInter teachCfg oWts
-        , goodAnswers + if isGood then 1 else 0
+        , goodAnswers + if wasGood then 1 else 0
         , outputVals
         )
     )
