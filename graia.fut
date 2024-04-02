@@ -18,7 +18,7 @@ type TeachCfg = {
 -- changes weights between two layers
 def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
     let { maxWt, learningStep, wasGood, loss } = teachCfg
-    let limitWt = -- i32.max 0 <| maxWt -
+    let step = i8.max 0 <| (i8.abs maxWt) -
         if loss >= 127 then 1
         else if loss >= 64 then 2
         else if loss >= 32 then 3
@@ -26,28 +26,20 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
         else if loss >= 8 then 5
         else if loss >= 4 then 6
         else if loss >= 2 then 7
-        else if loss >= 1 then 8
-        else 0
+        else 8
     in
     interWts
     |> map (\nodeWts ->
         nodeWts
         |> map (\wt ->
-            if i8.abs wt < limitWt then
-                wt
-            else
             if wt == maxWt then
-                if wasGood then maxWt - learningStep else -maxWt + learningStep
+                if wasGood then maxWt - step else -maxWt + step
             else if wt == -maxWt then
-                if wasGood then -maxWt + learningStep else maxWt - learningStep
-            else if wt == 1 then
-                if wasGood then 1 else 1 + learningStep
-            else if wt == -1 then
-                if wasGood then -1 else -1 - learningStep
+                if wasGood then -maxWt + step else maxWt - step
             else if wt > 0 then
-                if wasGood then wt - learningStep else wt + learningStep
+                if wasGood then wt - step else i8.max maxWt (wt + step)
             else
-                if wasGood then wt + learningStep else wt - learningStep
+                if wasGood then wt + step else i8.min (-maxWt) (wt - step)
         )
     )
 
