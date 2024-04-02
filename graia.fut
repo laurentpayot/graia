@@ -60,6 +60,7 @@ def signedRightShift (w: Wt) (v: Val): i32 =
 -- input { 2 2i64 127 } output { 127u8 }
 -- input { 2 4i64 127 } output { 63u8 }
 -- input { 8 4i64 127 } output { 254u8 }
+-- input { 16 4i64 127 } output { 255u8 }
 def activation (excitRatio: i32) (inputs: i64) (s: i32): Val =
     -- ReLU
     if s <= 0 then 0 else u8.i32 <| i32.min 255 <|
