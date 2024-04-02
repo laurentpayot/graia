@@ -10,7 +10,6 @@ type Val = u8
 
 type TeachCfg = {
     maxWt: i8,
-    excitingRatio: i8,
     wasGood: bool,
     loss: u8
 }
@@ -25,7 +24,7 @@ def getStep (maxWt: Wt) (loss: u8) : i8 =
 
 -- changes weights between two layers
 def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
-    let { maxWt, excitingRatio, wasGood, loss } = teachCfg
+    let { maxWt, wasGood, loss } = teachCfg
     let step = (getStep maxWt loss)
     in
     interWts
@@ -50,9 +49,9 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
 -- input { 2i8 200u8 } output { 50 }
 -- input { -1i8 200u8 } output { -100 }
 -- input { -2i8 200u8 } output { -50 }
-def signedRightShift (w: Wt) (v: Val): i32 =
+def signedRightShift (excitRatio: i32) (w: Wt) (v: Val): i32 =
     if w > 0 then
-        i32.u8 (v >> u8.i8 w) * 64
+        i32.u8 (v >> u8.i8 w) * excitRatio
     else
         - i32.u8 (v >> u8.i8 (-w))
 
@@ -68,10 +67,10 @@ def activation (inputs: i64) (s: i32): Val =
 
 
 -- input layer with j nodes -> output layer with k nodes
-def outputs [k] [j] (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
+def outputs [k] [j] (excitRatio: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     interWts
     |> map (\inputWts ->
-        reduce (+) 0 (map2 signedRightShift inputWts inputs)
+        reduce (+) 0 (map2 (signedRightShift excitRatio) inputWts inputs)
     )
     |> map (activation j)
 
@@ -106,19 +105,19 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 -- lmo = layers minus one
 -- r = rows
 entry fit [r][i][n][lmo][o]
-    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
-    ( xs: [r][i]Val) (ys: [r]Val) (excitingRatio: i8)
+    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (excitRatio: i32)
+    (xs: [r][i]Val) (ys: [r]Val)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val) =
     foldl (\(iWts, hWts, oWts, goodAnswers, _) (x, y) ->
-        let inputVals = outputs x iWts
-        let hiddenVals = foldl outputs inputVals hWts
-        let outputVals = outputs hiddenVals oWts
+        let inputVals = outputs excitRatio x iWts
+        let hiddenVals = foldl (outputs excitRatio) inputVals hWts
+        let outputVals = outputs excitRatio hiddenVals oWts
         let wasGood =
             outputVals
             |> indexOfGreatest
             |> (==) (i64.u8 y)
         let loss = getLoss outputVals (i64.u8 y)
-        let teachCfg = { maxWt, excitingRatio, wasGood, loss }
+        let teachCfg = { maxWt, wasGood, loss }
         in
         ( teachInter teachCfg iWts
         , hWts |> map (\wts -> teachInter teachCfg wts)

@@ -28,6 +28,7 @@ class Graia:
         layers: int,
         outputs: int,
         max_weight: int = 8,  # maximum 8 for unsigned 8 bit integers
+        excit_ratio: int = 4,
         seed: int = None,
         # TODO
         # node_inputs=0,
@@ -48,6 +49,7 @@ class Graia:
             "layers": layers,
             "outputs": outputs,
             "max_weight": max_weight,
+            "excit_ratio": excit_ratio,
             # "node_dentrites": node_inputs,
         }
         # no zero weights
@@ -61,13 +63,6 @@ class Graia:
         )
         self.output_weights = rng.choice(wtsRange, size=(outputs, layer_nodes))
         self.last_outputs = np.zeros((outputs), dtype=np.uint8)
-        print(
-            self.input_weights.shape,
-            " -> ",
-            self.hidden_weights.shape,
-            " -> ",
-            self.output_weights.shape,
-        )
         print(f"Graia model with {self.parameters} random parameters instantiated.")
 
     def fit(
@@ -75,7 +70,6 @@ class Graia:
         xs: NDArray[InputVal],
         ys: NDArray[OutputVal],
         epochs: int,
-        exciting_ratio=1,
     ) -> None:
         for epoch in range(1, epochs + 1):
             input_weights, hidden_weights, output_weights, correct, last_outputs = (
@@ -84,9 +78,9 @@ class Graia:
                     self.input_weights,
                     self.hidden_weights,
                     self.output_weights,
+                    np.int32(self.config["excit_ratio"]),
                     xs,
                     ys,
-                    np.int8(exciting_ratio),
                 )
             )
             self.input_weights = graia.from_futhark(input_weights)
