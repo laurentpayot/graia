@@ -25,7 +25,8 @@ def getStep (maxWt: Wt) (loss: u8) : i8 =
 -- changes weights between two layers
 def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
     let { maxWt, wasGood, loss } = teachCfg
-    let step = (getStep maxWt loss)
+    let step = 1 --(getStep maxWt loss)
+    let wasGood = loss < 16
     in
     interWts
     |> map (\nodeWts ->
@@ -35,6 +36,10 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
                 if wasGood then maxWt - step else -maxWt + step
             else if wt == -maxWt then
                 if wasGood then -maxWt + step else maxWt - step
+            else if wt == 1 then
+                if wasGood then 1 else 1 + step
+            else if wt == -1 then
+                if wasGood then -1 else -1 - step
             else if wt > 0 then
                 if wasGood then wt - step else i8.min maxWt (wt + step)
             else
