@@ -79,6 +79,19 @@ def outputs [k] [j] (boost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     )
     |> map (activation boost j)
 
+def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
+    foldl (\valsLayers interWts ->
+        let vals =
+            interWts
+            |> map (\inputWts ->
+                reduce (+) 0 (map2 signedRightShift inputWts (last valsLayers))
+            )
+            |> map (activation boost n)
+        in
+        concat valsLayers [vals]
+    ) [inputs] interWtsLayers
+    |> tail
+
 -- ==
 -- entry: indexOfGreatest
 -- input { [3u8, 8u8, 11u8, 7u8] } output { 2i64 }
