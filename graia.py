@@ -43,7 +43,7 @@ class Graia:
         )
 
         self.config: dict = {
-            "version": VERSION,
+            "graia_version": VERSION,
             "inputs": inputs,
             "layer_nodes": layer_nodes,
             "layers": layers,
