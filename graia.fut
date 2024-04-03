@@ -66,18 +66,18 @@ def signedRightShift (w: Wt) (v: Val): i32 =
 -- input { 2 4i64 127 } output { 63u8 }
 -- input { 8 4i64 127 } output { 254u8 }
 -- input { 16 4i64 127 } output { 255u8 }
-def activation (excitRatio: i32) (inputs: i64) (s: i32): Val =
+def activation (boost: i32) (inputs: i64) (s: i32): Val =
     -- ReLU
     if s <= 0 then 0 else u8.i32 <| i32.min 255 <|
-        (excitRatio * s) / (i32.i64 inputs)
+        (boost * s) / (i32.i64 inputs)
 
 -- input layer with j nodes -> output layer with k nodes
-def outputs [k] [j] (excitRatio: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
+def outputs [k] [j] (boost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     interWts
     |> map (\inputWts ->
         reduce (+) 0 (map2 signedRightShift inputWts inputs)
     )
-    |> map (activation excitRatio j)
+    |> map (activation boost j)
 
 -- ==
 -- entry: indexOfGreatest
@@ -110,13 +110,13 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 -- lmo = layers minus one
 -- r = rows
 entry fit [r][i][n][lmo][o]
-    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (excitRatio: i32)
+    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
     (xs: [r][i]Val) (ys: [r]Val)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val) =
     foldl (\(iWts, hWts, oWts, goodAnswers, _) (x, y) ->
-        let inputVals = outputs excitRatio x iWts
-        let hiddenVals = foldl (outputs excitRatio) inputVals hWts
-        let outputVals = outputs excitRatio hiddenVals oWts
+        let inputVals = outputs boost x iWts
+        let hiddenVals = foldl (outputs boost) inputVals hWts
+        let outputVals = outputs boost hiddenVals oWts
         let wasGood =
             outputVals
             |> indexOfGreatest

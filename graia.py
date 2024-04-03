@@ -28,7 +28,7 @@ class Graia:
         layers: int,
         outputs: int,
         max_weight: int = 8,  # maximum 8 for unsigned 8 bit integers
-        excit_ratio: int = 32,
+        boost: int = 20,
         seed: int = None,
         # TODO
         # node_inputs=0,
@@ -49,7 +49,7 @@ class Graia:
             "layers": layers,
             "outputs": outputs,
             "max_weight": max_weight,
-            "excit_ratio": excit_ratio,
+            "boost": boost,
             # "node_dentrites": node_inputs,
         }
         # no zero weights
@@ -78,7 +78,7 @@ class Graia:
                     self.input_weights,
                     self.hidden_weights,
                     self.output_weights,
-                    np.int32(self.config["excit_ratio"]),
+                    np.int32(self.config["boost"]),
                     xs,
                     ys,
                 )
