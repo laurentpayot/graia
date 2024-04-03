@@ -7,10 +7,8 @@ from lib import _graia
 
 VERSION = "0.0.1"
 
-print(f"\n🌄 Graia v{VERSION}\n")
-print("Graia initializing…")
 graia = Futhark(_graia)
-print("Graia ready.\n")
+print(f"🌄 Graia v{VERSION}")
 
 # A weight of n is actually the division by 2 at the power of n (right shift by abs(n))
 # Weights are negative for inhibition, positive for excitation, zero for no connection
@@ -63,7 +61,7 @@ class Graia:
         )
         self.output_weights = rng.choice(wtsRange, size=(outputs, layer_nodes))
         self.last_outputs = np.zeros((outputs), dtype=np.uint8)
-        print(f"Graia model with {self.parameters} random parameters instantiated.")
+        print(f"🌄 Graia model with {self.parameters:,} parameters ready.")
 
     def fit(
         self,
