@@ -121,7 +121,7 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
     (xs: [r][i]Val) (ys: [r]Val)
-    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val, [lmo][n]Val) =
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val, [lmo + 1][n]Val) =
     foldl (\(iWts, hWtsLayers, oWts, goodAnswers, _, _) (x, y) ->
         let inputVals = outputs boost x iWts
         let hiddenValsLayers = outputsLayers boost inputVals hWtsLayers
@@ -138,10 +138,10 @@ entry fit [r][i][n][lmo][o]
         , teachInter teachCfg oWts
         , goodAnswers + if wasGood then 1 else 0
         , outputVals
-        , hiddenValsLayers
+        , [inputVals] ++ hiddenValsLayers |> sized (lmo + 1)
         )
     )
-    (inputWts, hiddenWtsLayers, outputWts, 0, (tabulate o (\_ -> 0u8)), tabulate_2d lmo n (\_ _ -> 0u8))
+    (inputWts, hiddenWtsLayers, outputWts, 0, (tabulate o (\_ -> 0u8)), tabulate_2d (lmo + 1) n (\_ _ -> 0u8))
     (zip xs ys)
 
 -- TODO
