@@ -88,10 +88,11 @@ def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo]
             )
             |> map (activation boost n)
         in
-        sized (lmo +1) (concat valsLayers [vals])
-    ) (sized (lmo +1) [inputs]) interWtsLayers
-    |> tail
-    |> sized lmo
+        concat (tail valsLayers) [vals]
+        |> sized lmo
+    ) ((tabulate_2d (lmo - 1) n (\_ _ -> 0u8)) ++ [inputs] |> sized lmo) interWtsLayers
+    --  |> tail
+    --  |> sized lmo
 
 -- ==
 -- entry: indexOfGreatest
