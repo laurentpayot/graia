@@ -80,19 +80,13 @@ def outputs [k] [j] (boost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     |> map (activation boost j)
 
 def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
+    let inputsFill = tabulate_2d (lmo - 1) n (\_ _ -> 0u8)
+    in
     foldl (\valsLayers interWts ->
-        let vals =
-            interWts
-            |> map (\inputWts ->
-                reduce (+) 0 (map2 signedRightShift inputWts (last valsLayers))
-            )
-            |> map (activation boost n)
+        let vals = outputs boost (last valsLayers) interWts
         in
-        concat (tail valsLayers) [vals]
-        |> sized lmo
-    ) ((tabulate_2d (lmo - 1) n (\_ _ -> 0u8)) ++ [inputs] |> sized lmo) interWtsLayers
-    --  |> tail
-    --  |> sized lmo
+        (tail valsLayers) ++ [vals] |> sized lmo
+    ) (inputsFill ++ [inputs] |> sized lmo) interWtsLayers
 
 -- ==
 -- entry: indexOfGreatest
