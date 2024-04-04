@@ -23,27 +23,28 @@ def getStep (maxWt: Wt) (loss: u8) : i8 =
     i8.i32 <| ((i32.i8 maxWt - 1) * (i32.u8 loss)) / 255i32
 
 -- changes weights between two layers
-def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) : [k][j]Wt =
+def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastOutputs: [k]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss } = teachCfg
     let step = 1 --(getStep maxWt loss)
     let wasGood = loss < 16
     in
-    interWts
-    |> map (\nodeWts ->
+    zip interWts lastOutputs
+    |> map (\(nodeWts, lastOutput) ->
+        let wasTriggered = lastOutput > 0
+        in
         nodeWts
         |> map (\wt ->
-            if wt == maxWt then
-                if wasGood then maxWt - step else -maxWt + step
-            else if wt == -maxWt then
-                if wasGood then -maxWt + step else maxWt - step
-            else if wt == 1 then
-                if wasGood then 1 else 1 + step
-            else if wt == -1 then
-                if wasGood then -1 else -1 - step
-            else if wt > 0 then
-                if wasGood then wt - step else i8.min maxWt (wt + step)
+            if wasTriggered then
+                if wt == maxWt then
+                    if wasGood then maxWt - step else -maxWt + step
+                else if wt == -maxWt then
+                    if wasGood then -maxWt + step else maxWt - step
+                else if wt > 0 then
+                    if wasGood then i8.min 1 (wt - step) else i8.min maxWt (wt + step)
+                else
+                    if wasGood then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
             else
-                if wasGood then wt + step else i8.max (-maxWt) (wt - step)
+                if wt > 0 then i8.min 1 (wt - step) else i8.max (-maxWt) (wt - step)
         )
     )
 
@@ -133,9 +134,9 @@ entry fit [r][i][n][lmo][o]
         let loss = getLoss outputVals (i64.u8 y)
         let teachCfg = { maxWt, wasGood, loss }
         in
-        ( teachInter teachCfg iWts
-        , hWtsLayers |> map (\wts -> teachInter teachCfg wts)
-        , teachInter teachCfg oWts
+        ( teachInter teachCfg iWts inputVals
+        , zip hWtsLayers hiddenValsLayers |> map (\(wts, vals)-> teachInter teachCfg wts vals)
+        , teachInter teachCfg oWts outputVals
         , goodAnswers + if wasGood then 1 else 0
         , outputVals
         , [inputVals] ++ hiddenValsLayers |> sized (lmo + 1)
