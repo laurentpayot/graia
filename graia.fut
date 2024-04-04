@@ -79,8 +79,8 @@ def outputs [k] [j] (boost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     )
     |> map (activation boost j)
 
-def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo+1-1][n]Val =
-    foldl (\valsLayers interWts ->
+def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
+    (foldl (\valsLayers interWts ->
         let vals =
             interWts
             |> map (\inputWts ->
@@ -91,6 +91,7 @@ def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo]
         concat valsLayers [vals] :> [lmo+1][n]Val
     ) ([inputs] :> [lmo+1][n]Val) interWtsLayers
     |> tail
+    ) :> [lmo][n]Val
 
 -- ==
 -- entry: indexOfGreatest
@@ -123,13 +124,13 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 -- lmo = layers minus one
 -- r = rows
 entry fit [r][i][n][lmo][o]
-    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWts: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
+    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
     (xs: [r][i]Val) (ys: [r]Val)
-    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val) =
-    foldl (\(iWts, hWts, oWts, goodAnswers, _) (x, y) ->
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val, [lmo][n]Val) =
+    foldl (\(iWts, hWtsLayers, oWts, goodAnswers, _, _) (x, y) ->
         let inputVals = outputs boost x iWts
-        let hiddenVals = foldl (outputs boost) inputVals hWts
-        let outputVals = outputs boost hiddenVals oWts
+        let hiddenValsLayers = outputsLayers boost inputVals hWtsLayers
+        let outputVals = outputs boost (last hiddenValsLayers) oWts
         let wasGood =
             outputVals
             |> indexOfGreatest
@@ -138,13 +139,14 @@ entry fit [r][i][n][lmo][o]
         let teachCfg = { maxWt, wasGood, loss }
         in
         ( teachInter teachCfg iWts
-        , hWts |> map (\wts -> teachInter teachCfg wts)
+        , hWtsLayers |> map (\wts -> teachInter teachCfg wts)
         , teachInter teachCfg oWts
         , goodAnswers + if wasGood then 1 else 0
         , outputVals
+        , hiddenValsLayers
         )
     )
-    (inputWts, hiddenWts, outputWts, 0, (tabulate o (\_ -> 0u8)))
+    (inputWts, hiddenWtsLayers, outputWts, 0, (tabulate o (\_ -> 0u8)), tabulate_2d lmo n (\_ _ -> 0u8))
     (zip xs ys)
 
 -- TODO
