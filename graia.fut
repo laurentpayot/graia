@@ -25,12 +25,19 @@ def getStep (maxWt: Wt) (loss: u8) : i8 =
 -- changes weights between two layers
 def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastOutputs: [k]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss } = teachCfg
-    let step = 1 --(getStep maxWt loss)
+    -- let step = 1 --(getStep maxWt loss)
     let wasGood = loss < 16
     in
     zip interWts lastOutputs
     |> map (\(nodeWts, lastOutput) ->
         let wasTriggered = lastOutput > 0
+        let guilt = loss * lastOutput
+        let step =
+            maxWt - <|
+                if guilt < 32512 then
+                    1
+                else -- TODO !!!!!!!!!!!!!!!!!!!!!!!!!!
+
         in
         nodeWts
         |> map (\wt ->
