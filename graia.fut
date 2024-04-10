@@ -31,17 +31,21 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastOutputs: [
     zip interWts lastOutputs
     |> map (\(nodeWts, lastOutput) ->
         let wasTriggered = lastOutput > 0
-        let guilt = loss * lastOutput
-        let step =
-            maxWt - <|
-                if guilt < 32512 then
-                    1
-                else -- TODO !!!!!!!!!!!!!!!!!!!!!!!!!!
+        -- let guilt = loss * lastOutput
+        -- let step =
+        --     maxWt - <|
+        --         if guilt < 32512 then
+        --             1
+        --         else -- TODO !!!!!!!!!!!!!!!!!!!!!!!!!!
 
         in
         nodeWts
         |> map (\wt ->
-            if wasTriggered then
+            let isToChange = 2 ** (maxWt - i8.abs wt) < i8.u8 loss
+            -- let step = getStep maxWt loss
+            let step = 1
+            in
+            if isToChange then
                 if wt == maxWt then
                     if wasGood then maxWt - step else -maxWt + step
                 else if wt == -maxWt then
@@ -51,7 +55,8 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastOutputs: [
                 else
                     if wasGood then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
             else
-                if wt > 0 then i8.min 1 (wt - step) else i8.max (-maxWt) (wt - step)
+                -- if wt > 0 then i8.min 1 (wt - step) else i8.max (-maxWt) (wt - step)
+                wt
         )
     )
 
