@@ -16,46 +16,40 @@ type TeachCfg = {
 
 -- ==
 -- entry: getStep
--- input { 8i8 255u8 } output { 7i8 }
--- input { 8i8 0u8 } output { 0i8 }
--- input { 8i8 127u8 } output { 3i8 }
-def getStep (maxWt: Wt) (loss: u8) : i8 =
-    i8.i32 <| ((i32.i8 maxWt - 1) * (i32.u8 loss)) / 255i32
+-- input { 8i8 255u8 255u8 } output { 7i8 }
+-- input { 8i8 255u8 127u8 } output { 3i8 }
+-- input { 8i8 0u8 255u8 } output { 0i8 }
+-- input { 8i8 127u8 255u8 } output { 3i8 }
+def getStep (maxWt: Wt) (loss: u8) (lastOutput: Val): i8 =
+    i8.i32 <| ((i32.i8 maxWt - 1) * (i32.u8 loss) * (i32.u8 lastOutput)) / 65025i32
 
 -- changes weights between two layers
 def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastOutputs: [k]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss } = teachCfg
     -- let step = 1 --(getStep maxWt loss)
-    let wasGood = loss < 16
+    -- let wasGood = loss < 16
     in
     zip interWts lastOutputs
     |> map (\(nodeWts, lastOutput) ->
         let wasTriggered = lastOutput > 0
-        -- let guilt = loss * lastOutput
-        -- let step =
-        --     maxWt - <|
-        --         if guilt < 32512 then
-        --             1
-        --         else -- TODO !!!!!!!!!!!!!!!!!!!!!!!!!!
-
         in
         nodeWts
         |> map (\wt ->
             let isToChange = 2 ** (maxWt - i8.abs wt) < i8.u8 loss
-            -- let step = getStep maxWt loss
-            let step = 1
             in
             if isToChange then
-                if wt == maxWt then
-                    if wasGood then maxWt - step else -maxWt + step
-                else if wt == -maxWt then
-                    if wasGood then -maxWt + step else maxWt - step
-                else if wt > 0 then
-                    if wasGood then i8.min 1 (wt - step) else i8.min maxWt (wt + step)
+                let step = getStep maxWt loss lastOutput
+                -- let step = 1
+                in
+                -- if wt > 0 then
+                --     if not isToChange then i8.min 1 (wt + step) else i8.min maxWt (wt + step)
+                -- else
+                --     if not isToChange then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
+                if wt > 0 then
+                    if wasTriggered then i8.min maxWt (wt + step) else i8.min 1 (wt - step)
                 else
-                    if wasGood then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
+                    if wasTriggered then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
             else
-                -- if wt > 0 then i8.min 1 (wt - step) else i8.max (-maxWt) (wt - step)
                 wt
         )
     )
