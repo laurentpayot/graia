@@ -90,6 +90,11 @@ def outputs [k] [j] (boost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     interWts
     |> map (output boost inputs)
 
+
+def getStep2 (maxWt: Wt) (loss: u8) (contrib: i32): i8 =
+    i8.i32 <| ((i32.i8 maxWt - 1) * contrib) / 255
+
+
 def teachInter2 [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss } = teachCfg
     -- let lastOutput = outputs 64 lastInputs interWts
@@ -97,18 +102,21 @@ def teachInter2 [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [
     in
     interWts
     |> map (\nodeWts ->
+        -- TODO remove hardcoded 64 boost
         let lastOutput = output 64 lastInputs nodeWts
+        let wasTriggered = lastOutput > 0
         in
         zip nodeWts lastInputs
         |> map (\(wt, lastInput) ->
             let contrib = signedRightShift wt lastInput
             let wasBig =  i32.abs contrib < i32.u8 loss
             let step = 1
+            -- let step = getStep2 maxWt loss contrib
             in
             if wt > 0 then
-                if wasBig then i8.min maxWt (wt + step) else i8.min 1 (wt - step)
+                if wasTriggered then i8.min maxWt (wt + step) else i8.min 1 (wt - step)
             else
-                if wasBig then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
+                if wasTriggered then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
         )
     )
 
