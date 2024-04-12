@@ -25,34 +25,35 @@ def getStep (maxWt: Wt) (loss: u8) (lastOutput: Val): i8 =
 
 -- changes weights between two layers
 def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastOutputs: [k]Val) : [k][j]Wt =
-    let { maxWt, wasGood, loss } = teachCfg
-    -- let step = 1 --(getStep maxWt loss)
-    -- let wasGood = loss < 16
-    in
-    zip interWts lastOutputs
-    |> map (\(nodeWts, lastOutput) ->
-        let wasTriggered = lastOutput > 0
-        in
-        nodeWts
-        |> map (\wt ->
-            let isToChange = 2 ** (maxWt - i8.abs wt) < i8.u8 loss
-            in
-            if isToChange then
-                let step = getStep maxWt loss lastOutput
-                -- let step = 1
-                in
-                -- if wt > 0 then
-                --     if not isToChange then i8.min 1 (wt + step) else i8.min maxWt (wt + step)
-                -- else
-                --     if not isToChange then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
-                if wt > 0 then
-                    if wasTriggered then i8.min maxWt (wt + step) else i8.min 1 (wt - step)
-                else
-                    if wasTriggered then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
-            else
-                wt
-        )
-    )
+    interWts
+    -- let { maxWt, wasGood, loss } = teachCfg
+    -- -- let step = 1 --(getStep maxWt loss)
+    -- -- let wasGood = loss < 16
+    -- in
+    -- zip interWts lastOutputs
+    -- |> map (\(nodeWts, lastOutput) ->
+    --     let wasTriggered = lastOutput > 0
+    --     in
+    --     nodeWts
+    --     |> map (\wt ->
+    --         let isToChange = 2 ** (maxWt - i8.abs wt) < i8.u8 loss
+    --         in
+    --         if isToChange then
+    --             let step = getStep maxWt loss lastOutput
+    --             -- let step = 1
+    --             in
+    --             -- if wt > 0 then
+    --             --     if not isToChange then i8.min 1 (wt + step) else i8.min maxWt (wt + step)
+    --             -- else
+    --             --     if not isToChange then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
+    --             if wt > 0 then
+    --                 if wasTriggered then i8.min maxWt (wt + step) else i8.min 1 (wt - step)
+    --             else
+    --                 if wasTriggered then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
+    --         else
+    --             wt
+    --     )
+    -- )
 
 -- SKIP ==
 -- entry: signedRightShift
