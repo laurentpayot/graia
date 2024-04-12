@@ -86,6 +86,26 @@ def outputs [k] [j] (boost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     )
     |> map (activation boost j)
 
+def teachInter2 [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
+    let { maxWt, wasGood, loss } = teachCfg
+    -- let lastOutput = outputs
+    -- let wasGood = loss < 16
+    in
+    interWts
+    |> map (\nodeWts ->
+        zip nodeWts lastInputs
+        |> map (\(wt, lastInput) ->
+            let contrib = signedRightShift wt lastInput
+            let wasBig =  i32.abs contrib > i32.u8 loss
+            let step = 1
+            in
+            if wt > 0 then
+                if wasBig then i8.min maxWt (wt + step) else i8.min 1 (wt - step)
+            else
+                if wasBig then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
+        )
+    )
+
 def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
     let inputsFill = tabulate_2d (lmo - 1) n (\_ _ -> 0u8)
     in
@@ -94,6 +114,9 @@ def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo]
         in
         (tail valsLayers) ++ [vals] |> sized lmo
     ) (inputsFill ++ [inputs] |> sized lmo) interWtsLayers
+
+def inputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
+    [inputs] ++ outputsLayers boost inputs (init interWtsLayers) |> sized lmo
 
 -- ==
 -- entry: indexOfGreatest
