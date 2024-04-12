@@ -81,11 +81,14 @@ def activation (boost: i32) (inputs: i64) (s: i32): Val =
 def dotShift [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
     reduce (+) 0 (map2 signedRightShift wts inputs)
 
+def output [j] (boost: i32) (inputs: [j]Val) (wts: [j]Wt): Val =
+    dotShift inputs wts
+    |> activation boost j
+
 -- input layer with j nodes -> output layer with k nodes
 def outputs [k] [j] (boost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     interWts
-    |> map (dotShift inputs)
-    |> map (activation boost j)
+    |> map (output boost inputs)
 
 def teachInter2 [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss } = teachCfg
@@ -94,7 +97,7 @@ def teachInter2 [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [
     in
     interWts
     |> map (\nodeWts ->
-        let lastOutput = dotShift lastInputs nodeWts |> activation 64 j
+        let lastOutput = output 64 lastInputs nodeWts
         in
         zip nodeWts lastInputs
         |> map (\(wt, lastInput) ->
