@@ -78,25 +78,28 @@ def activation (boost: i32) (inputs: i64) (s: i32): Val =
     if s <= 0 then 0 else u8.i32 <| i32.min 255 <|
         (boost * s) / (i32.i64 inputs)
 
+def dotShift [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
+    reduce (+) 0 (map2 signedRightShift wts inputs)
+
 -- input layer with j nodes -> output layer with k nodes
 def outputs [k] [j] (boost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     interWts
-    |> map (\inputWts ->
-        reduce (+) 0 (map2 signedRightShift inputWts inputs)
-    )
+    |> map (dotShift inputs)
     |> map (activation boost j)
 
 def teachInter2 [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss } = teachCfg
-    -- let lastOutput = outputs
+    -- let lastOutput = outputs 64 lastInputs interWts
     -- let wasGood = loss < 16
     in
     interWts
     |> map (\nodeWts ->
+        let lastOutput = dotShift lastInputs nodeWts |> activation 64 j
+        in
         zip nodeWts lastInputs
         |> map (\(wt, lastInput) ->
             let contrib = signedRightShift wt lastInput
-            let wasBig =  i32.abs contrib > i32.u8 loss
+            let wasBig =  i32.abs contrib < i32.u8 loss
             let step = 1
             in
             if wt > 0 then
