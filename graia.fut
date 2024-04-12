@@ -163,9 +163,10 @@ entry fit [r][i][n][lmo][o]
         let loss = getLoss outputVals (i64.u8 y)
         let teachCfg = { maxWt, wasGood, loss }
         in
-        ( teachInter teachCfg iWts inputVals
-        , zip hWtsLayers hiddenValsLayers |> map (\(wts, vals)-> teachInter teachCfg wts vals)
-        , teachInter teachCfg oWts outputVals
+        ( teachInter2 teachCfg iWts x
+        , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))
+            |> map (\(wts, ins) -> teachInter2 teachCfg wts ins)
+        , teachInter2 teachCfg oWts (last hiddenValsLayers)
         , goodAnswers + if wasGood then 1 else 0
         , outputVals
         , [inputVals] ++ hiddenValsLayers |> sized (lmo + 1)
