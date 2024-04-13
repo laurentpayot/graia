@@ -95,15 +95,14 @@ def getStep2 (maxWt: Wt) (loss: u8) (contrib: i32): i8 =
     i8.i32 <| ((i32.i8 maxWt - 1) * contrib) / 255
 
 
-def teachInter2 [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
+def teachInter2 [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss } = teachCfg
     -- let lastOutput = outputs 64 lastInputs interWts
     -- let wasGood = loss < 16
     in
     interWts
     |> map (\nodeWts ->
-        -- TODO remove hardcoded 64 boost
-        let lastOutput = output 64 lastInputs nodeWts
+        let lastOutput = output boost lastInputs nodeWts
         let wasTriggered = lastOutput > 0
         in
         zip nodeWts lastInputs
@@ -177,10 +176,10 @@ entry fit [r][i][n][lmo][o]
         let loss = getLoss outputVals (i64.u8 y)
         let teachCfg = { maxWt, wasGood, loss }
         in
-        ( teachInter2 teachCfg iWts x
+        ( teachInter2 boost teachCfg iWts x
         , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))
-            |> map (\(wts, ins) -> teachInter2 teachCfg wts ins)
-        , teachInter2 teachCfg oWts (last hiddenValsLayers)
+            |> map (\(wts, ins) -> teachInter2 boost teachCfg wts ins)
+        , teachInter2 boost teachCfg oWts (last hiddenValsLayers)
         , goodAnswers + if wasGood then 1 else 0
         , outputVals
         , [inputVals] ++ hiddenValsLayers |> sized (lmo + 1)
