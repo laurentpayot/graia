@@ -101,24 +101,24 @@ def teachInter2 [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [
     -- let wasGood = loss < 16
     in
     interWts
-    -- |> map (\nodeWts ->
-    --     -- TODO remove hardcoded 64 boost
-    --     let lastOutput = output 64 lastInputs nodeWts
-    --     let wasTriggered = lastOutput > 0
-    --     in
-    --     zip nodeWts lastInputs
-    --     |> map (\(wt, lastInput) ->
-    --         let contrib = signedRightShift wt lastInput
-    --         let wasBig =  i32.abs contrib < i32.u8 loss
-    --         let step = 1
-    --         -- let step = getStep2 maxWt loss contrib
-    --         in
-    --         if wt > 0 then
-    --             if wasTriggered then i8.min maxWt (wt + step) else i8.min 1 (wt - step)
-    --         else
-    --             if wasTriggered then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
-    --     )
-    -- )
+    |> map (\nodeWts ->
+        -- TODO remove hardcoded 64 boost
+        let lastOutput = output 64 lastInputs nodeWts
+        let wasTriggered = lastOutput > 0
+        in
+        zip nodeWts lastInputs
+        |> map (\(wt, lastInput) ->
+            let contrib = signedRightShift wt lastInput
+            let wasBig =  i32.abs contrib < i32.u8 loss
+            let step = 1
+            -- let step = getStep2 maxWt loss contrib
+            in
+            if wt > 0 then
+                if wasTriggered then i8.min maxWt (wt + step) else i8.min 1 (wt - step)
+            else
+                if wasTriggered then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
+        )
+    )
 
 def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
     let inputsFill = tabulate_2d (lmo - 1) n (\_ _ -> 0u8)
