@@ -95,8 +95,29 @@ def getStep2 (maxWt: Wt) (loss: u8) (contrib: i32): i8 =
     i8.i32 <| ((i32.i8 maxWt - 1) * contrib) / 255
 
 
+def exciteFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
+    if w == -maxWt then
+        maxWt
+    else
+        if w == 1 then
+            1
+        else
+            w - step
+
+def inhibitFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
+    if w == maxWt then
+        -maxWt
+    else
+        if w == -1 then
+            -1
+        else
+            w + step
+
 def teachInter2 [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss } = teachCfg
+    let step = 1
+    let excite = exciteFor maxWt step
+    let inhibit = inhibitFor maxWt step
     -- let lastOutput = outputs 64 lastInputs interWts
     -- let wasGood = loss < 16
     in
@@ -106,31 +127,21 @@ def teachInter2 [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (
         let wasTriggered = lastOutput > 0
         in
         zip nodeWts lastInputs
-        |> map (\(wt, lastInput) ->
-            let contrib = signedRightShift wt lastInput
+        |> map (\(w, lastInput) ->
+            let contrib = signedRightShift w lastInput
             let isToChange =  i32.abs contrib < i32.u8 loss
-            let step = 1
             -- let step = getStep2 maxWt loss contrib
             in
             if wasTriggered then
                 if isToChange then
-                    if wt > 0 then
                         if wasGood then
-                            i8.max 1 (wt - step)
+                            excite w
                         else
-                            i8.min maxWt (wt + step)
-                    else
-                        if wasGood then
-                            i8.min (-1) (wt + step)
-                        else
-                            i8.max (-maxWt) (wt - step)
+                            inhibit w
                 else
-                    wt
+                    w
             else
-                if wt > 0 then
-                    i8.min 1 (wt - step)
-                else
-                    i8.max (-maxWt) (wt - step)
+                excite w
         )
     )
 
