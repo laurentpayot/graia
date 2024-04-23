@@ -57,17 +57,23 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastOutputs: [
 -- SKIP ==
 -- entry: signedRightShift
 -- input { 0i8 200u8 } output { 0 }
+-- input { 8i8 200u8 } output { 0 }
+-- input { -8i8 200u8 } output { 0 }
 -- input { 1i8 200u8 } output { 100 }
 -- input { 2i8 200u8 } output { 50 }
 -- input { -1i8 200u8 } output { -100 }
 -- input { -2i8 200u8 } output { -50 }
 def signedRightShift (w: Wt) (v: Val): i32 =
-    if w > 0 then
-        i32.u8 (v >> u8.i8 w)
+    -- TODO remove hardcoded 8
+    if i8.abs w == 8 then
+        0
     else
-        - i32.u8 (v >> u8.i8 (-w))
+        if w > 0 then
+            i32.u8 (v >> u8.i8 w)
+        else
+            - i32.u8 (v >> u8.i8 (-w))
 
--- ==
+-- SKIP ==
 -- entry: activation
 -- input { 2 2i64 127 } output { 127u8 }
 -- input { 2 4i64 127 } output { 63u8 }
@@ -76,7 +82,7 @@ def signedRightShift (w: Wt) (v: Val): i32 =
 def activation (boost: i32) (inputSize: i64) (s: i32): Val =
     -- ReLU
     if s <= 0 then 0 else u8.i32 <| i32.min 255 <|
-        (boost * s) / (i32.i64 inputSize)
+        (boost * s) --/ (i32.i64 inputSize)
 
 def dotShift [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
     reduce (+) 0 (map2 signedRightShift wts inputs)
@@ -97,7 +103,7 @@ def getStep2 (maxWt: Wt) (loss: u8) (contrib: i32): i8 =
 
 def exciteFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
     if w == -maxWt then
-        maxWt
+        maxWt - 1
     else
         if w == 1 then
             1
@@ -106,7 +112,7 @@ def exciteFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
 
 def inhibitFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
     if w == maxWt then
-        -maxWt
+        -maxWt + 1
     else
         if w == -1 then
             -1
