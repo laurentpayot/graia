@@ -154,8 +154,8 @@ def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo]
         (tail valsLayers) ++ [vals] |> sized lmo
     ) (inputsFill ++ [inputs] |> sized lmo) interWtsLayers
 
-def inputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
-    [inputs] ++ outputsLayers boost inputs (init interWtsLayers) |> sized lmo
+-- def inputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
+--     [inputs] ++ outputsLayers boost inputs (init interWtsLayers) |> sized lmo
 
 -- ==
 -- entry: indexOfGreatest
