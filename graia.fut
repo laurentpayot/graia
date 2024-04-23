@@ -108,14 +108,29 @@ def teachInter2 [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (
         zip nodeWts lastInputs
         |> map (\(wt, lastInput) ->
             let contrib = signedRightShift wt lastInput
-            let wasBig =  i32.abs contrib < i32.u8 loss
+            let isToChange =  i32.abs contrib < i32.u8 loss
             let step = 1
             -- let step = getStep2 maxWt loss contrib
             in
-            if wt > 0 then
-                if wasTriggered then i8.min maxWt (wt + step) else i8.min 1 (wt - step)
+            if wasTriggered then
+                if isToChange then
+                    if wt > 0 then
+                        if wasGood then
+                            i8.max 1 (wt - step)
+                        else
+                            i8.min maxWt (wt + step)
+                    else
+                        if wasGood then
+                            i8.min (-1) (wt + step)
+                        else
+                            i8.max (-maxWt) (wt - step)
+                else
+                    wt
             else
-                if wasTriggered then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
+                if wt > 0 then
+                    i8.min 1 (wt - step)
+                else
+                    i8.max (-maxWt) (wt - step)
         )
     )
 
