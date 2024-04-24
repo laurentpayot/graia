@@ -71,7 +71,8 @@ def signedRightShift (w: Wt) (v: Val): i32 =
         if w > 0 then
             i32.u8 (v >> u8.i8 w)
         else
-            - i32.u8 (v >> u8.i8 (-w))
+            -- + 1 for less inhibition
+            - i32.u8 (v >> u8.i8 (-w + 1))
 
 -- SKIP ==
 -- entry: activation
