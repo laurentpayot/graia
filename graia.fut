@@ -64,15 +64,14 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastOutputs: [
 -- input { -1i8 200u8 } output { -100 }
 -- input { -2i8 200u8 } output { -50 }
 def signedRightShift (w: Wt) (v: Val): i32 =
-    -- TODO remove hardcoded 8
-    if i8.abs w == 8 then
-        0
-    else
+    -- if i8.abs w == 8 then -- TODO remove hardcoded 8
+    --     0
+    -- else
         if w > 0 then
             i32.u8 (v >> u8.i8 (w - 1))
         else
-            -- -1 + 1 (nothing) for less inhibition
-            - i32.u8 (v >> u8.i8 (-w))
+            -- if needed -1 + 1 (nothing) for less inhibition
+            - i32.u8 (v >> u8.i8 (-w - 1))
 
 -- SKIP ==
 -- entry: activation
@@ -136,10 +135,11 @@ def teachInter2 [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (
         zip nodeWts lastInputs
         |> map (\(w, lastInput) ->
             let contrib = signedRightShift w lastInput
-            let isToChange =  i32.abs contrib < i32.u8 loss
+            let isToChange = i32.abs contrib < i32.u8 loss
             -- let step = getStep2 maxWt loss contrib
             in
             if wasTriggered then
+            -- if true then
                 if isToChange then
                         if wasGood then
                             excite w
