@@ -41,27 +41,28 @@ def signedRightShift (w: Wt) (v: Val): i32 =
 -- input { 2 4i64 127 } output { 63u8 }
 -- input { 8 4i64 127 } output { 254u8 }
 -- input { 16 4i64 127 } output { 255u32 }
-def activation (boost: i32) (s: i32): Val =
+def activation (boost: i32) (n: i64) (s: i32): Val =
     -- ReLU
     if s <= 0 then
         0
     else
-        u32.i32 (boost * s)
+        u32.i32 (boost * s) -- / u32.i64 n
 
 def dotShift [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
     reduce (+) 0 (map2 signedRightShift wts inputs)
 
 def output [j] (boost: i32) (inputs: [j]Val) (wts: [j]Wt): Val =
     dotShift inputs wts
-    |> activation boost
+    |> activation boost j
 
 -- input layer with j nodes -> output layer with k nodes
 def outputs [k] [j] (boost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     interWts
     |> map (output boost inputs)
 
--- def getStep (maxWt: Wt) (loss: u32) (contrib: i32): i8 =
---     i8.i32 <| ((i32.i8 maxWt - 1) * contrib) / 255
+-- TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+def getStep (maxWt: Wt) (loss: u32) (contrib: i32): i8 =
+    i8.i32 <| ((i32.i8 maxWt - 1) * contrib) / 255
 
 def exciteFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
     if w == -maxWt then
@@ -84,9 +85,9 @@ def inhibitFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
 -- changes weights between two layers using last input values
 def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss } = teachCfg
-    let step = 1
-    let excite = exciteFor maxWt step
-    let inhibit = inhibitFor maxWt step
+    -- let step = 1
+    let excite = exciteFor maxWt
+    let inhibit = inhibitFor maxWt
     -- let lastOutput = outputs 64 lastInputs interWts
     -- let wasGood = loss < 16
     in
@@ -99,20 +100,23 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
         |> map (\(w, lastInput) ->
             let contrib = signedRightShift w lastInput
             let isToChange = i32.abs contrib < i32.u32 loss
-            -- let step = getStep maxWt loss contrib
+            let step = getStep maxWt loss contrib
             in
             if wasTriggered then
             -- if true then
-                -- if true then
-                if isToChange then
+                if true then
+                -- if isToChange then
                     if wasGood then
-                        excite w
+                        excite step w
                     else
-                        inhibit w
+                        inhibit step w
                 else
                     w
             else
-                w
+                if wasGood then
+                    inhibit step w
+                else
+                    excite step w
         )
     )
 
