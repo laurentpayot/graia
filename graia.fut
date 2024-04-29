@@ -18,7 +18,7 @@ type TeachCfg = {
 }
 
 
--- ==
+-- SKIP ==
 -- entry: signedRightShift
 -- input { 8i8 200u8 } output { 0 }
 -- input { -8i8 200u8 } output { 0 }
@@ -34,7 +34,7 @@ def signedRightShift (w: Wt) (v: Val): i32 =
             i32.u32 (v >> u32.i8 (w - 1))
         else
             -- if needed -1 + 1 (nothing) for less inhibition
-            - i32.u32 (v >> u32.i8 (-w - 1))
+            - i32.u32 (v >> u32.i8 (-w))
 
 -- SKIP ==
 -- entry: activation
@@ -165,8 +165,8 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u32 =
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
     (xsRows: [r][i]InputVal) (yRows: [r]AnswerVal)
-    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val, [lmo + 1][n]Val) =
-    foldl (\(iWts, hWtsLayers, oWts, goodAnswers, _, _) (xs', y) ->
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val, [lmo + 1][n]Val, i64) =
+    foldl (\(iWts, hWtsLayers, oWts, goodAnswers, _, _, _) (xs', y) ->
         let xs = map u32.u8 xs'
         let inputVals = outputs boost xs iWts
         let hiddenValsLayers = outputsLayers boost inputVals hWtsLayers
@@ -185,9 +185,10 @@ entry fit [r][i][n][lmo][o]
         , goodAnswers + if wasGood then 1 else 0
         , outputVals
         , [inputVals] ++ hiddenValsLayers |> sized (lmo + 1)
+        , indexOfGreatest outputVals
         )
     )
-    (inputWts, hiddenWtsLayers, outputWts, 0, (tabulate o (\_ -> 0u32)), tabulate_2d (lmo + 1) n (\_ _ -> 0u32))
+    (inputWts, hiddenWtsLayers, outputWts, 0, (tabulate o (\_ -> 0u32)), tabulate_2d (lmo + 1) n (\_ _ -> 0u32), 0)
     (zip xsRows yRows)
 
 -- TODO

@@ -77,6 +77,7 @@ class Graia:
                 correct,
                 last_outputs,
                 last_intermediate_outputs,
+                answer,
             ) = graia.fit(
                 np.int8(self.config["max_weight"]),
                 self.input_weights,
@@ -94,7 +95,9 @@ class Graia:
                 last_intermediate_outputs
             )
             accuracy = correct / ys.size
-            print(f"Epoch {epoch}/{epochs}: accuracy {100 * accuracy :.3f}%")
+            print(
+                f"Epoch {epoch}/{epochs}: accuracy {100 * accuracy :.3f}%  for {answer}"
+            )
 
     # def teachInput(self) -> None:
     #     g.teachInter(np.int8(1), False, self.input_weights)
