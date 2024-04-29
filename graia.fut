@@ -6,9 +6,9 @@
 type Wt = i8
 
 type InputVal = u8 -- for xs
-type OutputVal = u8 -- for ys
+type AnswerVal = u8 -- for ys
 
--- Val = output value of a hidden node
+-- Val = output value of a node
 type Val = u32
 
 type TeachCfg = {
@@ -159,20 +159,21 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u32 =
 -- r = rows
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
-    (xs: [r][i]InputVal) (ys: [r]OutputVal)
-    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]OutputVal, [lmo + 1][n]Val) =
-    foldl (\(iWts, hWtsLayers, oWts, goodAnswers, _, _) (x, y) ->
-        let inputVals = outputs boost x iWts
+    (xsRows: [r][i]InputVal) (yRows: [r]AnswerVal)
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val, [lmo + 1][n]Val) =
+    foldl (\(iWts, hWtsLayers, oWts, goodAnswers, _, _) (xs', y) ->
+        let xs = map u32.u8 xs'
+        let inputVals = outputs boost xs iWts
         let hiddenValsLayers = outputsLayers boost inputVals hWtsLayers
         let outputVals = outputs boost (last hiddenValsLayers) oWts
         let wasGood =
             outputVals
             |> indexOfGreatest
-            |> (==) (i64.u32 y)
-        let loss = getLoss outputVals (i64.u32 y)
+            |> (==) (i64.u8 y)
+        let loss = getLoss outputVals (i64.u8 y)
         let teachCfg = { maxWt, wasGood, loss }
         in
-        ( teachInterLastInputs boost teachCfg iWts x
+        ( teachInterLastInputs boost teachCfg iWts xs
         , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))
             |> map (\(wts, ins) -> teachInterLastInputs boost teachCfg wts ins)
         , teachInterLastInputs boost teachCfg oWts (last hiddenValsLayers)
@@ -182,7 +183,7 @@ entry fit [r][i][n][lmo][o]
         )
     )
     (inputWts, hiddenWtsLayers, outputWts, 0, (tabulate o (\_ -> 0u32)), tabulate_2d (lmo + 1) n (\_ _ -> 0u32))
-    (zip xs ys)
+    (zip xsRows yRows)
 
 -- TODO
 entry predict (x: i32): i32 =
