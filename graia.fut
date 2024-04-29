@@ -23,19 +23,18 @@ type TeachCfg = {
 def getStep (maxWt: Wt) (loss: u8) (lastOutput: Val): i8 =
     i8.i32 <| ((i32.i8 maxWt - 1) * (i32.u8 loss) * (i32.u8 lastOutput)) / 65025i32
 
--- SKIP ==
+-- ==
 -- entry: signedRightShift
--- input { 0i8 200u8 } output { 0 }
 -- input { 8i8 200u8 } output { 0 }
 -- input { -8i8 200u8 } output { 0 }
--- input { 1i8 200u8 } output { 100 }
--- input { 2i8 200u8 } output { 50 }
--- input { -1i8 200u8 } output { -100 }
--- input { -2i8 200u8 } output { -50 }
+-- input { 1i8 200u8 } output { 200 }
+-- input { 2i8 200u8 } output { 100 }
+-- input { -1i8 200u8 } output { -200 }
+-- input { -2i8 200u8 } output { -100 }
 def signedRightShift (w: Wt) (v: Val): i32 =
-    -- if i8.abs w == 8 then -- TODO remove hardcoded 8
-    --     0
-    -- else
+    if i8.abs w == 8 then -- TODO remove hardcoded 8
+        0
+    else
         if w > 0 then
             i32.u8 (v >> u8.i8 (w - 1))
         else
