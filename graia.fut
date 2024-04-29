@@ -103,15 +103,16 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
             in
             if wasTriggered then
             -- if true then
+                -- if true then
                 if isToChange then
-                        if wasGood then
-                            excite w
-                        else
-                            inhibit w
+                    if wasGood then
+                        excite w
+                    else
+                        inhibit w
                 else
                     w
             else
-                excite w
+                w
         )
     )
 
@@ -141,7 +142,7 @@ def greatestVal (ys: []Val) : Val =
     loop greatest = 0 for i < length ys do
         if ys[i] > greatest then ys[i] else greatest
 
--- TODO ==
+-- ==
 -- entry: getLoss
 -- input { [0u32, 0u32, 255u32, 0u32] 2i64 } output { 0u32 }
 -- input { [255u32, 255u32, 0u32, 255u32] 2i64 } output { 255u32 }
