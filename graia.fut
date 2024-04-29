@@ -23,10 +23,9 @@ type TeachCfg = {
 def getStep (maxWt: Wt) (loss: u8) (lastOutput: Val): i8 =
     i8.i32 <| ((i32.i8 maxWt - 1) * (i32.u8 loss) * (i32.u8 lastOutput)) / 65025i32
 
--- changes weights between two layers
-def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastOutputs: [k]Val) : [k][j]Wt =
+-- changes weights between two layers using last output values
+def teachInterLastOutputs [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastOutputs: [k]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss } = teachCfg
-    -- let step = 1 --(getStep maxWt loss)
     -- let wasGood = loss < 16
     in
     zip interWts lastOutputs
@@ -39,12 +38,7 @@ def teachInter [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastOutputs: [
             in
             if isToChange then
                 let step = getStep maxWt loss lastOutput
-                -- let step = 1
                 in
-                -- if wt > 0 then
-                --     if not isToChange then i8.min 1 (wt + step) else i8.min maxWt (wt + step)
-                -- else
-                --     if not isToChange then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
                 if wt > 0 then
                     if wasTriggered then i8.min maxWt (wt + step) else i8.min 1 (wt - step)
                 else
@@ -119,7 +113,8 @@ def inhibitFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
         else
             w + step
 
-def teachInter2 [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
+-- changes weights between two layers using last input values
+def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss } = teachCfg
     let step = 1
     let excite = exciteFor maxWt step
@@ -209,10 +204,10 @@ entry fit [r][i][n][lmo][o]
         let loss = getLoss outputVals (i64.u8 y)
         let teachCfg = { maxWt, wasGood, loss }
         in
-        ( teachInter2 boost teachCfg iWts x
+        ( teachInterLastInputs boost teachCfg iWts x
         , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))
-            |> map (\(wts, ins) -> teachInter2 boost teachCfg wts ins)
-        , teachInter2 boost teachCfg oWts (last hiddenValsLayers)
+            |> map (\(wts, ins) -> teachInterLastInputs boost teachCfg wts ins)
+        , teachInterLastInputs boost teachCfg oWts (last hiddenValsLayers)
         , goodAnswers + if wasGood then 1 else 0
         , outputVals
         , [inputVals] ++ hiddenValsLayers |> sized (lmo + 1)
