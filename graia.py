@@ -15,7 +15,7 @@ print(f"🌄 Graia v{VERSION}")
 Weight: TypeAlias = np.int8
 
 InputVal: TypeAlias = np.uint8
-OutputVal: TypeAlias = np.uint8
+AnswerVal: TypeAlias = np.uint8
 
 
 class Graia:
@@ -66,7 +66,7 @@ class Graia:
     def fit(
         self,
         xs: NDArray[InputVal],
-        ys: NDArray[OutputVal],
+        ys: NDArray[AnswerVal],
         epochs: int,
     ) -> None:
         for epoch in range(1, epochs + 1):
