@@ -14,14 +14,6 @@ type TeachCfg = {
     loss: u8
 }
 
--- ==
--- entry: getStep
--- input { 8i8 255u8 255u8 } output { 7i8 }
--- input { 8i8 255u8 127u8 } output { 3i8 }
--- input { 8i8 0u8 255u8 } output { 0i8 }
--- input { 8i8 127u8 255u8 } output { 3i8 }
-def getStep (maxWt: Wt) (loss: u8) (lastOutput: Val): i8 =
-    i8.i32 <| ((i32.i8 maxWt - 1) * (i32.u8 loss) * (i32.u8 lastOutput)) / 65025i32
 
 -- ==
 -- entry: signedRightShift
