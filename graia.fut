@@ -40,7 +40,7 @@ def signedRightShift (w: Wt) (v: Val): i32 =
 -- entry: activation
 -- input { 2 4i64 127 } output { 63u8 }
 -- input { 8 4i64 127 } output { 254u8 }
--- input { 16 4i64 127 } output { 255u8 }
+-- input { 16 4i64 127 } output { 255u32 }
 def activation (boost: i32) (s: i32): Val =
     -- ReLU
     if s <= 0 then
@@ -129,28 +129,33 @@ def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo]
 
 -- ==
 -- entry: indexOfGreatest
--- input { [3u8, 8u8, 11u8, 7u8] } output { 2i64 }
--- input { [3u8, 8u8, 11u8, 11u8] } output { 2i64 }
-def indexOfGreatest (ys: []u32) : i64 =
+-- input { [3u32, 8u32, 11u32, 7u32] } output { 2i64 }
+-- input { [3u32, 8u32, 11u32, 11u32] } output { 2i64 }
+def indexOfGreatest (ys: []Val) : i64 =
     let (_, index) =
         loop (greatestVal, index) = (0, 0) for i < length ys do
             if ys[i] > greatestVal then (ys[i], i) else (greatestVal, index)
     in index
 
--- ==
+def greatestVal (ys: []Val) : Val =
+    loop greatest = 0 for i < length ys do
+        if ys[i] > greatest then ys[i] else greatest
+
+-- TODO ==
 -- entry: getLoss
--- input { [0u32, 0u32, 255u8, 0u32] 2i64 } output { 0u32 }
--- input { [255u8, 255u8, 0u32, 255u8] 2i64 } output { 255u8 }
--- input { [0u32, 0u32, 255u8, 0u32] 1i64 } output { 127u8 }
+-- input { [0u32, 0u32, 255u32, 0u32] 2i64 } output { 0u32 }
+-- input { [255u32, 255u32, 0u32, 255u32] 2i64 } output { 255u32 }
+-- input { [0u32, 0u32, 255u32, 0u32] 1i64 } output { 127u32 }
 def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u32 =
-    let idealOutputVals = tabulate o (\i -> if i == correctIndex then 255 else 0)
+    let greatestOutputVal = greatestVal outputVals
+    let idealOutputVals = tabulate o (\i -> if i == correctIndex then greatestOutputVal else 0)
     in
     zip outputVals idealOutputVals
     -- mean absolute error
-    |> map (\(out, ideal) -> i32.abs (i32.u32(out) - ideal))
+    |> map (\(out, ideal) -> i64.abs (i64.u32 out - i64.u32 ideal))
     |> reduce (+) 0
-    |> (\sum -> sum / i32.i64 o)
-    |> u32.i32
+    |> (\sum -> sum / o)
+    |> u32.i64
 
 -- i = inputs
 -- n = nodes per layer
