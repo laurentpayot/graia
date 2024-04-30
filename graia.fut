@@ -155,10 +155,10 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 -- r = rows
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
-    (xs: [r][i]Val) (ys: [r]Val)
+    (xsRows: [r][i]Val) (yRows: [r]Val)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val, [lmo + 1][n]Val) =
-    foldl (\(iWts, hWtsLayers, oWts, goodAnswers, _, _) (x, y) ->
-        let inputVals = outputs boost x iWts
+    foldl (\(iWts, hWtsLayers, oWts, goodAnswers, _, _) (xs, y) ->
+        let inputVals = outputs boost xs iWts
         let hiddenValsLayers = outputsLayers boost inputVals hWtsLayers
         let outputVals = outputs boost (last hiddenValsLayers) oWts
         let wasGood =
@@ -168,7 +168,7 @@ entry fit [r][i][n][lmo][o]
         let loss = getLoss outputVals (i64.u8 y)
         let teachCfg = { maxWt, wasGood, loss }
         in
-        ( teachInterLastInputs boost teachCfg iWts x
+        ( teachInterLastInputs boost teachCfg iWts xs
         , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))
             |> map (\(wts, ins) -> teachInterLastInputs boost teachCfg wts ins)
         , teachInterLastInputs boost teachCfg oWts (last hiddenValsLayers)
@@ -178,7 +178,7 @@ entry fit [r][i][n][lmo][o]
         )
     )
     (inputWts, hiddenWtsLayers, outputWts, 0, (tabulate o (\_ -> 0u8)), tabulate_2d (lmo + 1) n (\_ _ -> 0u8))
-    (zip xs ys)
+    (zip xsRows yRows)
 
 -- TODO
 entry predict (x: i32): i32 =
