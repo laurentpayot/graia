@@ -95,21 +95,19 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
         in
         zip nodeWts lastInputs
         |> map (\(w, lastInput) ->
-            let contrib = signedRightShift w lastInput
-            let isToChange = i32.abs contrib < i32.u8 loss
+            let wasInputTriggered = lastInput > 0
+            -- let contrib = signedRightShift w lastInput
+            -- let isToChange = i32.abs contrib < i32.u8 loss
             -- let step = getStep maxWt loss contrib
             in
-            if wasTriggered then
-            -- if true then
-                if isToChange then
-                        if wasGood then
-                            excite w
-                        else
-                            inhibit w
-                else
-                    w
+            if wasGood then
+                -- Hebbian learning: "Neurons that fire together, wire together."
+                if wasTriggered && wasInputTriggered then
+                        excite w
+                    else
+                        inhibit w
             else
-                excite w
+                w
         )
     )
 
