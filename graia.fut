@@ -107,7 +107,13 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
                     else
                         inhibit w
             else
-                w
+                if wasInputTriggered then
+                    if wasTriggered then
+                        inhibit w
+                    else
+                        excite w
+                else
+                    w
         )
     )
 
