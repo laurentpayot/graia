@@ -7,7 +7,8 @@
         "ndarray",
         "opencl",
         "pocl",
-        "pyopencl"
+        "pyopencl",
+        "retropropagation"
     ],
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
