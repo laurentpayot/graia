@@ -60,7 +60,6 @@ class Graia:
             wtsRange, size=(layers - 1, layer_nodes, layer_nodes)
         )
         self.output_weights = rng.choice(wtsRange, size=(outputs, layer_nodes))
-        self.last_outputs = np.zeros((outputs), dtype=np.uint8)
         print(f"🌄 Graia model with {self.parameters:,} parameters ready.")
 
     def fit(
@@ -74,7 +73,8 @@ class Graia:
                 input_weights,
                 hidden_weights,
                 output_weights,
-                correct,
+                correct_answers,
+                last_answer,
                 last_outputs,
                 last_intermediate_outputs,
             ) = graia.fit(
@@ -89,12 +89,17 @@ class Graia:
             self.input_weights = graia.from_futhark(input_weights)
             self.hidden_weights = graia.from_futhark(hidden_weights)
             self.output_weights = graia.from_futhark(output_weights)
+            self.last_answer = last_answer
             self.last_outputs = graia.from_futhark(last_outputs)
             self.last_intermediate_outputs = graia.from_futhark(
                 last_intermediate_outputs
             )
-            accuracy = correct / ys.size
-            print(f"Epoch {epoch}/{epochs}: accuracy {100 * accuracy :.3f}%")
+            if len(xs) == 1:
+                isCorrect = ys[0] == last_answer
+                print(f"Epoch {epoch}/{epochs}: answer {last_answer} is {isCorrect}")
+            else:
+                accuracy = correct_answers / ys.size
+                print(f"Epoch {epoch}/{epochs}: accuracy {100 * accuracy :.3f}%")
 
     # def teachInput(self) -> None:
     #     g.teachInter(np.int8(1), False, self.input_weights)

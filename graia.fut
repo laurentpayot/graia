@@ -156,15 +156,13 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
     (xsRows: [r][i]Val) (yRows: [r]Val)
-    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, [o]Val, [lmo + 1][n]Val) =
-    foldl (\(iWts, hWtsLayers, oWts, goodAnswers, _, _) (xs, y) ->
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, i64, [o]Val, [lmo + 1][n]Val) =
+    foldl (\(iWts, hWtsLayers, oWts, goodAnswers, _, _, _) (xs, y) ->
         let inputVals = outputs boost xs iWts
         let hiddenValsLayers = outputsLayers boost inputVals hWtsLayers
         let outputVals = outputs boost (last hiddenValsLayers) oWts
-        let wasGood =
-            outputVals
-            |> indexOfGreatest
-            |> (==) (i64.u8 y)
+        let answer = indexOfGreatest outputVals
+        let wasGood = answer == i64.u8 y
         let loss = getLoss outputVals (i64.u8 y)
         let teachCfg = { maxWt, wasGood, loss }
         in
@@ -173,11 +171,12 @@ entry fit [r][i][n][lmo][o]
             |> map (\(wts, ins) -> teachInterLastInputs boost teachCfg wts ins)
         , teachInterLastInputs boost teachCfg oWts (last hiddenValsLayers)
         , goodAnswers + if wasGood then 1 else 0
+        , answer
         , outputVals
         , [inputVals] ++ hiddenValsLayers |> sized (lmo + 1)
         )
     )
-    (inputWts, hiddenWtsLayers, outputWts, 0, (tabulate o (\_ -> 0u8)), tabulate_2d (lmo + 1) n (\_ _ -> 0u8))
+    (inputWts, hiddenWtsLayers, outputWts, 0, 0, (tabulate o (\_ -> 0u8)), tabulate_2d (lmo + 1) n (\_ _ -> 0u8))
     (zip xsRows yRows)
 
 -- TODO
