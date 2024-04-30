@@ -14,40 +14,6 @@ type TeachCfg = {
     loss: u8
 }
 
--- ==
--- entry: getStep
--- input { 8i8 255u8 255u8 } output { 7i8 }
--- input { 8i8 255u8 127u8 } output { 3i8 }
--- input { 8i8 0u8 255u8 } output { 0i8 }
--- input { 8i8 127u8 255u8 } output { 3i8 }
-def getStep (maxWt: Wt) (loss: u8) (lastOutput: Val): i8 =
-    i8.i32 <| ((i32.i8 maxWt - 1) * (i32.u8 loss) * (i32.u8 lastOutput)) / 65025i32
-
--- changes weights between two layers using last output values
-def teachInterLastOutputs [k] [j] (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastOutputs: [k]Val) : [k][j]Wt =
-    let { maxWt, wasGood, loss } = teachCfg
-    -- let wasGood = loss < 16
-    in
-    zip interWts lastOutputs
-    |> map (\(nodeWts, lastOutput) ->
-        let wasTriggered = lastOutput > 0
-        in
-        nodeWts
-        |> map (\wt ->
-            let isToChange = 2 ** (maxWt - i8.abs wt) < i8.u8 loss
-            in
-            if isToChange then
-                let step = getStep maxWt loss lastOutput
-                in
-                if wt > 0 then
-                    if wasTriggered then i8.min maxWt (wt + step) else i8.min 1 (wt - step)
-                else
-                    if wasTriggered then i8.max (-1) (wt + step) else i8.max (-maxWt) (wt - step)
-            else
-                wt
-        )
-    )
-
 -- SKIP ==
 -- entry: signedRightShift
 -- input { 0i8 200u8 } output { 0 }
@@ -91,7 +57,7 @@ def outputs [k] [j] (boost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     |> map (output boost inputs)
 
 
-def getStep2 (maxWt: Wt) (loss: u8) (contrib: i32): i8 =
+def getStep (maxWt: Wt) (loss: u8) (contrib: i32): i8 =
     i8.i32 <| ((i32.i8 maxWt - 1) * contrib) / 255
 
 
@@ -131,7 +97,7 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
         |> map (\(w, lastInput) ->
             let contrib = signedRightShift w lastInput
             let isToChange = i32.abs contrib < i32.u8 loss
-            -- let step = getStep2 maxWt loss contrib
+            -- let step = getStep maxWt loss contrib
             in
             if wasTriggered then
             -- if true then
