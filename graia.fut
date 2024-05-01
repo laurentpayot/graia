@@ -100,10 +100,17 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
             in
             if wasGood then
                 -- Hebbian learning: "Neurons that fire together, wire together."
-                if wasInputTriggered && wasTriggered then
-                    excite w
+                if wasInputTriggered then
+                    if wasTriggered then
+                        excite w
+                    else
+                        inhibit w
                 else
-                    inhibit w
+                    if wasTriggered then
+                        inhibit w
+                    else
+                        excite w
+
             else
                 if wasInputTriggered && wasTriggered then
                     if w < 0 then excite w else inhibit w
