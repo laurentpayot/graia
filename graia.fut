@@ -24,9 +24,9 @@ type TeachCfg = {
 -- input { -1i8 200u8 } output { -100 }
 -- input { -2i8 200u8 } output { -50 }
 def signedRightShift (w: Wt) (v: Val): i32 =
-    -- if i8.abs w == 8 then -- TODO remove hardcoded 8
-    --     0
-    -- else
+    if w == -8 then -- TODO remove hardcoded 8
+        0
+    else
         if w > 0 then
             i32.u8 (v >> u8.i8 (w - 1))
         else
