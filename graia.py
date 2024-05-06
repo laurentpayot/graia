@@ -60,6 +60,7 @@ class Graia:
             wtsRange, size=(layers - 1, layer_nodes, layer_nodes)
         )
         self.output_weights = rng.choice(wtsRange, size=(outputs, layer_nodes))
+        self.accuracy_history: list[float] = []
         print(f"🌄 Graia model with {self.parameters:,} parameters ready.")
 
     def fit(
@@ -99,6 +100,7 @@ class Graia:
                 print(f"Epoch {epoch}/{epochs}: answer {last_answer} is {isCorrect}")
             else:
                 accuracy = correct_answers / ys.size
+                self.accuracy_history.append(accuracy)
                 print(f"Epoch {epoch}/{epochs}: accuracy {100 * accuracy :.3f}%")
 
     # def teachInput(self) -> None:
