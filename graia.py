@@ -69,6 +69,8 @@ class Graia:
         ys: NDArray[OutputVal],
         epochs: int,
     ) -> None:
+        start = len(self.accuracy_history)
+        stop = start + epochs
         for epoch in range(1, epochs + 1):
             (
                 input_weights,
@@ -101,7 +103,7 @@ class Graia:
             else:
                 accuracy = correct_answers / ys.size
                 self.accuracy_history.append(accuracy)
-                print(f"Epoch {epoch}/{epochs}: accuracy {100 * accuracy :.3f}%")
+                print(f"Epoch {start + epoch}/{stop}: accuracy {100 * accuracy :.3f}%")
 
     # def teachInput(self) -> None:
     #     g.teachInter(np.int8(1), False, self.input_weights)
