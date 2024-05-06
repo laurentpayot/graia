@@ -104,6 +104,12 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
             let step = contrib - (signedRightShift w lastOutput)
             -- let step = (signedRightShift w lastOutput) - contrib
             -- let step = contrib - i32.u8 lastOutput
+            -- let step =  i32.u8 loss - contrib
+            -- let step = contrib - (signedRightShift w lastOutput) + i32.u8 loss
+            -- let step = i32.i8 (w) * (i32.u8 lastInput - (signedRightShift w lastOutput))
+            -- let step = (i32.u8 loss - contrib) * (i32.i8 w)
+            -- let step = -(signedRightShift w loss - signedRightShift w lastOutput)
+            -- let step = -(signedRightShift w loss - contrib)
 
             in
             if wasGood then
