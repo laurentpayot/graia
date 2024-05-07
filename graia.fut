@@ -176,8 +176,8 @@ entry fit [r][i][n][lmo][o]
         let hiddenValsLayers = outputsLayers boost inputVals hWtsLayers
         let outputVals = outputs boost (last hiddenValsLayers) oWts
         let answer = indexOfGreatest outputVals
-        let wasGood = answer == i64.u8 y
         let loss = getLoss outputVals (i64.u8 y)
+        let wasGood = answer == i64.u8 y && loss < 127
         let teachCfg = { maxWt, wasGood, loss }
         in
         ( teachInterLastInputs boost teachCfg iWts xs
