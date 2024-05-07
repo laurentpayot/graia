@@ -64,7 +64,7 @@ class Graia:
         xs: NDArray[InputVal],
         ys: NDArray[OutputVal],
         epochs: int,
-        learning_rate: float = 0.002,
+        learning_divider: np.uint8 = 255,
     ) -> None:
         start = len(self.accuracy_history)
         stop = start + epochs
@@ -78,7 +78,7 @@ class Graia:
                 last_outputs,
                 last_intermediate_outputs,
             ) = graia.fit(
-                learning_rate,
+                learning_divider,
                 self.input_weights,
                 self.hidden_weights,
                 self.output_weights,
