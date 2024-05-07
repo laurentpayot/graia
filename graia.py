@@ -10,7 +10,6 @@ VERSION = "0.0.1"
 graia = Futhark(_graia)
 print(f"🌄 Graia v{VERSION}")
 
-# A weight of n is actually the division by 2 at the power of n (right shift by abs(n))
 # Weights are negative for inhibition, positive for excitation, zero for no connection
 Weight: TypeAlias = np.int8
 
@@ -25,7 +24,6 @@ class Graia:
         layer_nodes: int,
         layers: int,
         outputs: int,
-        max_weight: int = 8,  # maximum 8 for unsigned 8 bit integers
         boost: int = 64,
         seed: int = None,
         # TODO
@@ -46,20 +44,18 @@ class Graia:
             "layer_nodes": layer_nodes,
             "layers": layers,
             "outputs": outputs,
-            "max_weight": max_weight,
             "boost": boost,
             # "node_dentrites": node_inputs,
         }
-        # no zero weights
-        wtsRange = np.concatenate(
-            (np.arange(-max_weight, 0), np.arange(1, (max_weight + 1))), dtype=Weight
+        self.input_weights = rng.integers(
+            -127, 127, size=(layer_nodes, inputs), dtype=np.int8
         )
-        # print("Weights range:", wtsRange)
-        self.input_weights = rng.choice(wtsRange, size=(layer_nodes, inputs))
-        self.hidden_weights = rng.choice(
-            wtsRange, size=(layers - 1, layer_nodes, layer_nodes)
+        self.hidden_weights = rng.integers(
+            -127, 127, size=(layers - 1, layer_nodes, layer_nodes), dtype=np.int8
         )
-        self.output_weights = rng.choice(wtsRange, size=(outputs, layer_nodes))
+        self.output_weights = rng.integers(
+            -127, 127, size=(outputs, layer_nodes), dtype=np.int8
+        )
         self.accuracy_history: list[float] = []
         print(f"🌄 Graia model with {self.parameters:,} parameters ready.")
 
@@ -68,6 +64,7 @@ class Graia:
         xs: NDArray[InputVal],
         ys: NDArray[OutputVal],
         epochs: int,
+        learning_rate: float = 0.002,
     ) -> None:
         start = len(self.accuracy_history)
         stop = start + epochs
@@ -81,7 +78,7 @@ class Graia:
                 last_outputs,
                 last_intermediate_outputs,
             ) = graia.fit(
-                np.int8(self.config["max_weight"]),
+                learning_rate,
                 self.input_weights,
                 self.hidden_weights,
                 self.output_weights,
