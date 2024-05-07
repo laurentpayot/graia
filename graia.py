@@ -64,7 +64,7 @@ class Graia:
         xs: NDArray[InputVal],
         ys: NDArray[OutputVal],
         epochs: int,
-        learning_divider: np.uint8 = 255,
+        learning_divider: np.int32 = 255,
     ) -> None:
         start = len(self.accuracy_history)
         stop = start + epochs

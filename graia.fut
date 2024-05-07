@@ -8,7 +8,7 @@ type Wt = i8
 type Val = u8
 
 type TeachCfg = {
-    learningDivider: u8,
+    learningDivider: i32,
     wasGood: bool,
     loss: u8
 }
@@ -25,7 +25,7 @@ def prod (w: Wt) (v: Val): i32 =
 def activation (boost: i32) (inputSize: i64) (s: i32): Val =
     -- ReLU
     if s <= 0 then 0 else u8.i32 <| i32.min 255 <|
-        (boost * s) --/ (i32.i64 inputSize)
+        (s * boost) --/ (i32.i64 inputSize)
 
 def dotProd [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
     (reduce (+) 0 (map2 prod wts inputs)) / 127
@@ -57,8 +57,9 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
             -- let isToChange = i32.abs contrib < i32.u8 loss
 
             -- Oja’s rule
-            let delta = i32.u8 learningDivider *
-                i32.u8 lastOutput * (i32.u8 lastInput - (prod w lastOutput) / 127)
+            let delta =
+                (i32.u8 lastOutput * (i32.u8 lastInput - ((prod w lastOutput) / 127)))
+                / learningDivider
 
 
             -- Laurent Payot’s empiric rule
@@ -74,7 +75,8 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
 
             in
             if wasGood then
-                i32.i8 w + delta
+                -- (if delta > 0 then i32.i8 w + 1 else i32.i8 w - 1)
+                (i32.i8 w + delta)
                 |> i32.max (-127)
                 |> i32.min 127
                 |> i8.i32
@@ -126,7 +128,7 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 -- lmo = layers minus one
 -- r = rows
 entry fit [r][i][n][lmo][o]
-    (learningDivider: u8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
+    (learningDivider: i32) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
     (xsRows: [r][i]Val) (yRows: [r]Val)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, i64, [o]Val, [lmo + 1][n]Val) =
     foldl (\(iWts, hWtsLayers, oWts, goodAnswers, _, _, _) (xs, y) ->
