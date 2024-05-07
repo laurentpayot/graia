@@ -8,12 +8,12 @@ type Wt = i8
 type Val = u8
 
 type TeachCfg = {
-    learningRate: f16,
+    learningDivider: u8,
     wasGood: bool,
     loss: u8
 }
 
-def product (w: Wt) (v: Val): i32 =
+def prod (w: Wt) (v: Val): i32 =
     i32.i8 w * i32.u8 v
 
 -- SKIP ==
@@ -27,11 +27,11 @@ def activation (boost: i32) (inputSize: i64) (s: i32): Val =
     if s <= 0 then 0 else u8.i32 <| i32.min 255 <|
         (boost * s) --/ (i32.i64 inputSize)
 
-def dotProduct [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
-    (reduce (+) 0 (map2 product wts inputs)) / 127
+def dotProd [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
+    (reduce (+) 0 (map2 prod wts inputs)) / 127
 
 def output [j] (boost: i32) (inputs: [j]Val) (wts: [j]Wt): Val =
-    dotProduct inputs wts
+    dotProd inputs wts
     |> activation boost j
 
 -- input layer with j nodes -> output layer with k nodes
@@ -41,7 +41,7 @@ def outputs [k] [j] (boost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
 
 -- changes weights between two layers using last input values
 def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
-    let { wasGood, loss } = teachCfg
+    let { learningDivider, wasGood, loss } = teachCfg
     -- let lastOutput = outputs 64 lastInputs interWts
     -- let wasGood = loss < 16
     in
@@ -53,34 +53,33 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
         zip nodeWts lastInputs
         |> map (\(w, lastInput) ->
             -- let wasInputTriggered = lastInput > 0
-            let contrib = (product w lastInput) / 127
+            -- let contrib = (prod w lastInput) / 127
             -- let isToChange = i32.abs contrib < i32.u8 loss
 
             -- Oja’s rule
-            let step = i32.u8 lastInput - (signedRightShift w lastOutput)
+            let delta = i32.u8 learningDivider *
+                i32.u8 lastOutput * (i32.u8 lastInput - (prod w lastOutput) / 127)
+
 
             -- Laurent Payot’s empiric rule
-            -- let step = contrib - (signedRightShift w lastOutput)
-            -- let step = (signedRightShift w lastOutput) - contrib
-            -- let step = contrib - i32.u8 lastOutput
-            -- let step =  i32.u8 loss - contrib
-            -- let step = contrib - (signedRightShift w lastOutput) + i32.u8 loss
-            -- let step = i32.i8 (w) * (i32.u8 lastInput - (signedRightShift w lastOutput))
-            -- let step = (i32.u8 loss - contrib) * (i32.i8 w)
-            -- let step = -(signedRightShift w loss - signedRightShift w lastOutput)
-            -- let step = -(signedRightShift w loss - contrib)
+            -- let delta = contrib - (signedRightShift w lastOutput)
+            -- let delta = (signedRightShift w lastOutput) - contrib
+            -- let delta = contrib - i32.u8 lastOutput
+            -- let delta =  i32.u8 loss - contrib
+            -- let delta = contrib - (signedRightShift w lastOutput) + i32.u8 loss
+            -- let delta = i32.i8 (w) * (i32.u8 lastInput - (signedRightShift w lastOutput))
+            -- let delta = (i32.u8 loss - contrib) * (i32.i8 w)
+            -- let delta = -(signedRightShift w loss - signedRightShift w lastOutput)
+            -- let delta = -(signedRightShift w loss - contrib)
 
             in
             if wasGood then
-                if step > 0 then
-                    excite w
-                else if step < 0 then
-                    inhibit w
-                else
-                    w
+                i32.i8 w + delta
+                |> i32.max (-127)
+                |> i32.min 127
+                |> i8.i32
             else
                 w
-                -- if w < 0 then excite w else inhibit w
         )
     )
 
@@ -127,7 +126,7 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 -- lmo = layers minus one
 -- r = rows
 entry fit [r][i][n][lmo][o]
-    (learningRate: f16) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
+    (learningDivider: u8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
     (xsRows: [r][i]Val) (yRows: [r]Val)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, i64, [o]Val, [lmo + 1][n]Val) =
     foldl (\(iWts, hWtsLayers, oWts, goodAnswers, _, _, _) (xs, y) ->
@@ -137,7 +136,7 @@ entry fit [r][i][n][lmo][o]
         let answer = indexOfGreatest outputVals
         let wasGood = answer == i64.u8 y
         let loss = getLoss outputVals (i64.u8 y)
-        let teachCfg = { learningRate, wasGood, loss }
+        let teachCfg = { learningDivider, wasGood, loss }
         in
         ( teachInterLastInputs boost teachCfg iWts xs
         , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))
