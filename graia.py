@@ -1,4 +1,4 @@
-from typing import TypeAlias
+from typing import TypeAlias, TypedDict
 import numpy as np
 from numpy.typing import NDArray
 from futhark_ffi import Futhark
@@ -16,6 +16,11 @@ Weight: TypeAlias = np.int8
 
 InputVal: TypeAlias = np.uint8
 OutputVal: TypeAlias = np.uint8
+
+
+class History(TypedDict):
+    accuracy: list[float]
+    loss: list[float]
 
 
 class Graia:
@@ -60,8 +65,7 @@ class Graia:
             wtsRange, size=(layers - 1, layer_nodes, layer_nodes)
         )
         self.output_weights = rng.choice(wtsRange, size=(outputs, layer_nodes))
-        self.accuracy_history: list[float] = []
-        self.loss_history: list[float] = []
+        self.history: History = {"accuracy": [], "loss": []}
         print(f"🌄 Graia model with {self.parameters:,} parameters ready.")
 
     def fit(
@@ -70,7 +74,7 @@ class Graia:
         ys: NDArray[OutputVal],
         epochs: int,
     ) -> None:
-        start = len(self.accuracy_history)
+        start = len(self.history["loss"])
         stop = start + epochs
         for epoch in range(1, epochs + 1):
             (
@@ -104,9 +108,9 @@ class Graia:
                 print(f"Epoch {epoch}/{epochs}: answer {last_answer} is {isCorrect}")
             else:
                 accuracy = correct_answers / ys.size
-                self.accuracy_history.append(accuracy)
+                self.history["accuracy"].append(accuracy)
                 loss = total_loss / (ys.size * 255)
-                self.loss_history.append(loss)
+                self.history["loss"].append(loss)
                 print(
                     f"Epoch {start + epoch}/{stop}:\t accuracy {100 * accuracy :.3f}%\t loss {100 * loss :.3f}%"
                 )
