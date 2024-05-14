@@ -86,6 +86,7 @@ class Graia:
                 last_answer,
                 last_outputs,
                 last_intermediate_outputs,
+                previous_loss,
             ) = graia.fit(
                 np.int8(self.config["max_weight"]),
                 self.input_weights,

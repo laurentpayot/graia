@@ -11,7 +11,8 @@ type Val = u8
 type TeachCfg = {
     maxWt: i8,
     wasGood: bool,
-    loss: u8
+    loss: u8,
+    previousLoss: u8
 }
 
 -- SKIP ==
@@ -79,7 +80,7 @@ def inhibitFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
 
 -- changes weights between two layers using last input values
 def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
-    let { maxWt, wasGood, loss } = teachCfg
+    let { maxWt, wasGood, loss, previousLoss } = teachCfg
     let step = 1
     let excite = exciteFor maxWt step
     let inhibit = inhibitFor maxWt step
@@ -170,15 +171,15 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 entry fit [r][i][n][lmo][o]
     (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
     (xsRows: [r][i]Val) (yRows: [r]Val)
-    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, i32, i64, [o]Val, [lmo + 1][n]Val) =
-    foldl (\(iWts, hWtsLayers, oWts, goodAnswers, totalLoss, _, _, _) (xs, y) ->
+    : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, i32, i64, [o]Val, [lmo + 1][n]Val, u8) =
+    foldl (\(iWts, hWtsLayers, oWts, goodAnswers, totalLoss, _, _, _, previousLoss) (xs, y) ->
         let inputVals = outputs boost xs iWts
         let hiddenValsLayers = outputsLayers boost inputVals hWtsLayers
         let outputVals = outputs boost (last hiddenValsLayers) oWts
         let answer = indexOfGreatest outputVals
         let loss = getLoss outputVals (i64.u8 y)
         let wasGood = answer == i64.u8 y && loss < 127
-        let teachCfg = { maxWt, wasGood, loss }
+        let teachCfg = { maxWt, wasGood, loss, previousLoss }
         in
         ( teachInterLastInputs boost teachCfg iWts xs
         , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))
@@ -189,9 +190,10 @@ entry fit [r][i][n][lmo][o]
         , answer
         , outputVals
         , [inputVals] ++ hiddenValsLayers |> sized (lmo + 1)
+        , loss
         )
     )
-    (inputWts, hiddenWtsLayers, outputWts, 0, 0, 0, (tabulate o (\_ -> 0u8)), tabulate_2d (lmo + 1) n (\_ _ -> 0u8))
+    (inputWts, hiddenWtsLayers, outputWts, 0, 0, 0, (tabulate o (\_ -> 0u8)), tabulate_2d (lmo + 1) n (\_ _ -> 0u8), 255)
     (zip xsRows yRows)
 
 -- TODO
