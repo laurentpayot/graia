@@ -81,28 +81,27 @@ def inhibitFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
 -- changes weights between two layers using last input values
 def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss, previousLoss } = teachCfg
-    let step = 1
-    let excite = exciteFor maxWt step
-    let inhibit = inhibitFor maxWt step
-    -- let lastOutput = outputs 64 lastInputs interWts
+    let isBetter = loss < previousLoss
+    let excite = exciteFor maxWt 1
+    let inhibit = inhibitFor maxWt 1
     -- let wasGood = loss < 16
     in
     interWts
     |> map (\nodeWts ->
         let lastOutput = output boost lastInputs nodeWts
-        -- let wasTriggered = lastOutput > 0
+        let wasTriggered = lastOutput > 0
         in
         zip nodeWts lastInputs
         |> map (\(w, lastInput) ->
-            -- let wasInputTriggered = lastInput > 0
-            let contrib = signedRightShift w lastInput
+            let wasInputTriggered = lastInput > 0
+            -- let contrib = signedRightShift w lastInput
             -- let isToChange = i32.abs contrib < i32.u8 loss
 
             -- Oja’s rule
             -- let step = i32.u8 lastInput - (signedRightShift w lastOutput)
 
             -- Laurent Payot’s empiric rule
-            let step = contrib - (signedRightShift w lastOutput)
+            -- let step = contrib - (signedRightShift w lastOutput)
             -- let step = (signedRightShift w lastOutput) - contrib
             -- let step = contrib - i32.u8 lastOutput
             -- let step =  i32.u8 loss - contrib
@@ -113,16 +112,16 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
             -- let step = -(signedRightShift w loss - contrib)
 
             in
-            if wasGood then
-                if step > 0 then
+            if isBetter then
+                if wasInputTriggered && wasTriggered then
                     excite w
-                else if step < 0 then
-                    inhibit w
                 else
                     w
             else
-                w
-                -- if w < 0 then excite w else inhibit w
+                if wasInputTriggered && wasTriggered then
+                    inhibit w
+                else
+                    w
         )
     )
 
