@@ -43,7 +43,7 @@ def signedRightShift (w: Wt) (v: Val): i32 =
 def activation (boost: i32) (inputSize: i64) (s: i32): Val =
     -- ReLU
     if s <= 0 then 0 else u8.i32 <| i32.min 255 <|
-        (boost * s) --/ (i32.i64 inputSize)
+        (s * boost) --/ (i32.i64 inputSize)
 
 def dotShift [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
     reduce (+) 0 (map2 signedRightShift wts inputs)
