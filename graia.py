@@ -108,16 +108,17 @@ class Graia:
             self.history["accuracy"].append(accuracy)
             loss = total_loss / (ys.size * 255)
             self.history["loss"].append(loss)
-            progress = "=" * (12 * epoch // epochs)
+            progress = "█" * (12 * epoch // epochs)
             rest = " " * (12 - len(progress))
+            progress_bar = "▕" + progress + rest + "▏"
             if len(xs) == 1:
                 print(
-                    f"Epoch {epoch}/{epochs} [{progress}{rest}] answer {last_answer} is {ys[0] == last_answer}",
+                    f"Epoch {epoch}/{epochs}\t {progress_bar}\t answer {last_answer} is {ys[0] == last_answer}",
                     end="\t\r",
                 )
             else:
                 print(
-                    f"Epoch {start + epoch}/{stop} [{progress}{rest}]\t accuracy {100 * accuracy :.3f}%\t loss {100 * loss :.3f}%",
+                    f"Epoch {start + epoch}/{stop}\t {progress_bar}\t accuracy {100 * accuracy :.3f}%\t loss {100 * loss :.3f}%",
                     end="\t\r",
                 )
 
