@@ -81,7 +81,7 @@ def inhibitFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
 -- changes weights between two layers using last input values
 def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss, previousLoss } = teachCfg
-    let isBetter = loss < previousLoss
+    let wasBetter = loss < previousLoss
     let excite = exciteFor maxWt 1
     let inhibit = inhibitFor maxWt 1
     -- let wasGood = loss < 16
@@ -112,14 +112,20 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
             -- let step = -(signedRightShift w loss - contrib)
 
             in
-            if isBetter then
-                if wasInputTriggered && wasTriggered then
-                    excite w
+            if wasBetter then
+                if wasInputTriggered then
+                    if wasTriggered then
+                        excite w
+                    else
+                        inhibit w
                 else
                     w
             else
-                if wasInputTriggered && wasTriggered then
-                    inhibit w
+                if wasInputTriggered then
+                    if wasTriggered then
+                        inhibit w
+                    else
+                        excite w
                 else
                     w
         )
