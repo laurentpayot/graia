@@ -105,15 +105,16 @@ class Graia:
             self.last_intermediate_outputs = graia.from_futhark(
                 last_intermediate_outputs
             )
-            if len(xs) == 1:
-                isCorrect = ys[0] == last_answer
-                print(f"Epoch {epoch}/{epochs}: answer {last_answer} is {isCorrect}")
-            else:
-                accuracy = correct_answers / ys.size
-                self.history["accuracy"].append(accuracy)
-                loss = total_loss / (ys.size * 255)
-                self.history["loss"].append(loss)
-                if verbose:
+            accuracy = correct_answers / ys.size
+            self.history["accuracy"].append(accuracy)
+            loss = total_loss / (ys.size * 255)
+            self.history["loss"].append(loss)
+            if verbose:
+                if len(xs) == 1:
+                    print(
+                        f"Epoch {epoch}/{epochs}: answer {last_answer} is {ys[0] == last_answer}"
+                    )
+                else:
                     print(
                         f"Epoch {start + epoch}/{stop}:\t accuracy {100 * accuracy :.3f}%\t loss {100 * loss :.3f}%"
                     )
