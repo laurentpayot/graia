@@ -118,7 +118,7 @@ class Graia:
                 )
             else:
                 print(
-                    f"Epoch {start + epoch}/{stop}\t {progress_bar}\t accuracy {100 * accuracy :.3f}%\t loss {100 * loss :.3f}%",
+                    f"Epoch {start + epoch}/{stop}\t {progress_bar}\t Accuracy {100 * accuracy :.3f}%\t Loss (MAE) {100 * loss :.3f}%",
                     end="\t\r",
                 )
 
