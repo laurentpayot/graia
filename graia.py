@@ -73,7 +73,6 @@ class Graia:
         xs: NDArray[InputVal],
         ys: NDArray[OutputVal],
         epochs: int,
-        verbose: bool = True,
     ) -> None:
         start = len(self.history["loss"])
         stop = start + epochs
@@ -109,15 +108,16 @@ class Graia:
             self.history["accuracy"].append(accuracy)
             loss = total_loss / (ys.size * 255)
             self.history["loss"].append(loss)
-            if verbose:
-                if len(xs) == 1:
-                    print(
-                        f"Epoch {epoch}/{epochs}: answer {last_answer} is {ys[0] == last_answer}"
-                    )
-                else:
-                    print(
-                        f"Epoch {start + epoch}/{stop}:\t accuracy {100 * accuracy :.3f}%\t loss {100 * loss :.3f}%"
-                    )
+            if len(xs) == 1:
+                print(
+                    f"Epoch {epoch}/{epochs}: answer {last_answer} is {ys[0] == last_answer}\r",
+                    end="\r",
+                )
+            else:
+                print(
+                    f"Epoch {start + epoch}/{stop}:\t accuracy {100 * accuracy :.3f}%\t loss {100 * loss :.3f}%",
+                    end="\r",
+                )
 
     # def teachInput(self) -> None:
     #     g.teachInter(np.int8(1), False, self.input_weights)
