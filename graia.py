@@ -109,8 +109,8 @@ class Graia:
             loss = total_loss / (ys.size * 255)
             self.history["loss"].append(loss)
             progress = "█" * (12 * epoch // epochs)
-            rest = " " * (12 - len(progress))
-            progress_bar = "▕" + progress + rest + "▏"
+            rest = "░" * (12 - len(progress))
+            progress_bar = progress + rest
             if len(xs) == 1:
                 print(
                     f"Epoch {epoch}/{epochs}\t {progress_bar}\t answer {last_answer} is {ys[0] == last_answer}",
