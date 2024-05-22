@@ -7,6 +7,12 @@ An *experimental* neural network library.
 - Written in [Futhark](https://futhark-lang.org/) to leverage OpenCL for GPU acceleration.
 - Python API similar to [TensorFlow](https://www.tensorflow.org/).
 
+## Online Demo
+
+There is a painfully slow (no GPU) Python build online demo available on [HuggingFace](https://huggingface.co/spaces/LaurentPayot/Graia).
+
+For Graia to be usable, you’ll have to use it locally with a GPA as described below.
+
 ## Prerequisites
 
 To build Graia on a Debian/Ubuntu system, you need:
