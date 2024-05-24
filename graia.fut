@@ -39,10 +39,11 @@ def signedRightShift (w: Wt) (v: Val): i32 =
 
 -- ==
 -- entry: activation
--- input { 2 127 } output { 127u8 }
--- input { 2 127 } output { 63u8 }
--- input { 8 127 } output { 254u8 }
--- input { 16 127 } output { 255u8 }
+-- input { 1 -10 } output { 0u8 }
+-- input { 2 -10 } output { 0u8 }
+-- input { 1 127 } output { 127u8 }
+-- input { 2 127 } output { 254u8 }
+-- input { 3 127 } output { 255u8 }
 def activation (reluBoost: i32) (s: i32): Val =
     -- ReLU
     if s <= 0 then 0 else u8.i32 <| i32.min 255 <|
