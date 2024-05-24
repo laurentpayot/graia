@@ -4,7 +4,7 @@ An *experimental* neural network library.
 
 ## Goals
 
-- *Not* using a retropropagation algorithm for training. Retropropagation works pretty well but the main goal of this project is to find a training algorithm that would work using only the information available *locally* to the nodes. Current status: not working 😅, as you can see with these non-concluding learning curves: ![Learning curves](learning.png)
+- *Not* using a retropropagation algorithm for training. Retropropagation works pretty well but the main goal of this project is to find a training algorithm that would work using only the information available *locally* to the nodes. Current status: not working 😅, as you can see with these non-concluding learning curves: ![Learning curves](learning.png) The current algorithm is based on the simple Hebbian learning rule *"Nodes that fire together, wire together."*, meaning that the weight between a sending and a receiving node increases if the two nodes are active at the same time.
 - Using bit shifting instead of multiplication for faster computations. A kind of generalization of [BitNet b1.58](https://arxiv.org/pdf/2402.17764).
 - Written in [Futhark](https://futhark-lang.org/) to leverage OpenCL for GPU acceleration.
 - Python API similar to [TensorFlow](https://www.tensorflow.org/).
