@@ -31,7 +31,7 @@ class Graia:
         layers: int,
         outputs: int,
         max_weight: int = 8,  # maximum 8 for unsigned 8 bit integers
-        boost: int = 64,
+        relu_boost: int = 64,
         seed: int = None,
         # TODO
         # node_inputs=0,
@@ -52,7 +52,7 @@ class Graia:
             "layers": layers,
             "outputs": outputs,
             "max_weight": max_weight,
-            "boost": boost,
+            "relu_boost": relu_boost,
             # "node_dentrites": node_inputs,
         }
         # no zero weights
@@ -92,7 +92,7 @@ class Graia:
                 self.input_weights,
                 self.hidden_weights,
                 self.output_weights,
-                np.int32(self.config["boost"]),
+                np.int32(self.config["relu_boost"]),
                 xs,
                 ys,
             )

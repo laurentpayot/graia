@@ -36,22 +36,22 @@ def signedRightShift (w: Wt) (v: Val): i32 =
 -- input { 2 4i64 127 } output { 63u8 }
 -- input { 8 4i64 127 } output { 254u8 }
 -- input { 16 4i64 127 } output { 255u8 }
-def activation (boost: i32) (inputSize: i64) (s: i32): Val =
+def activation (reluBoost: i32) (inputSize: i64) (s: i32): Val =
     -- ReLU
     if s <= 0 then 0 else u8.i32 <| i32.min 255 <|
-        (s * boost)
+        (s * reluBoost)
 
 def dotShift [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
     reduce (+) 0 (map2 signedRightShift wts inputs)
 
-def output [j] (boost: i32) (inputs: [j]Val) (wts: [j]Wt): Val =
+def output [j] (reluBoost: i32) (inputs: [j]Val) (wts: [j]Wt): Val =
     dotShift inputs wts
-    |> activation boost j
+    |> activation reluBoost j
 
 -- input layer with j nodes -> output layer with k nodes
-def outputs [k] [j] (boost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
+def outputs [k] [j] (reluBoost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     interWts
-    |> map (output boost inputs)
+    |> map (output reluBoost inputs)
 
 def getStep (maxWt: Wt) (loss: u8) (contrib: i32): i8 =
     i8.i32 <| ((i32.i8 maxWt - 1) * contrib) / 255
@@ -75,7 +75,7 @@ def inhibitFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
             w + step
 
 -- changes weights between two layers using last input values
-def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
+def teachInterLastInputs [k] [j] (reluBoost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
     let { maxWt, wasGood, loss, previousLoss } = teachCfg
     let wasBetter = loss < previousLoss
     let excite = exciteFor maxWt 1
@@ -83,7 +83,7 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
     in
     interWts
     |> map (\nodeWts ->
-        let lastOutput = output boost lastInputs nodeWts
+        let lastOutput = output reluBoost lastInputs nodeWts
         let wasNodeTriggered = lastOutput > 0
         in
         zip nodeWts lastInputs
@@ -111,11 +111,11 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
         )
     )
 
-def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
+def outputsLayers [lmo] [n] (reluBoost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
     let inputsFill = tabulate_2d (lmo - 1) n (\_ _ -> 0u8)
     in
     foldl (\valsLayers interWts ->
-        let vals = outputs boost (last valsLayers) interWts
+        let vals = outputs reluBoost (last valsLayers) interWts
         in
         (tail valsLayers) ++ [vals] |> sized lmo
     ) (inputsFill ++ [inputs] |> sized lmo) interWtsLayers
@@ -151,22 +151,22 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 -- lmo = layers minus one
 -- r = rows
 entry fit [r][i][n][lmo][o]
-    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (boost: i32)
+    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (reluBoost: i32)
     (xsRows: [r][i]Val) (yRows: [r]Val)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, i32, i64, [o]Val, [lmo + 1][n]Val, u8) =
     foldl (\(iWts, hWtsLayers, oWts, goodAnswers, totalLoss, _, _, _, previousLoss) (xs, y) ->
-        let inputVals = outputs boost xs iWts
-        let hiddenValsLayers = outputsLayers boost inputVals hWtsLayers
-        let outputVals = outputs boost (last hiddenValsLayers) oWts
+        let inputVals = outputs reluBoost xs iWts
+        let hiddenValsLayers = outputsLayers reluBoost inputVals hWtsLayers
+        let outputVals = outputs reluBoost (last hiddenValsLayers) oWts
         let answer = indexOfGreatest outputVals
         let loss = getLoss outputVals (i64.u8 y)
         let wasGood = answer == i64.u8 y && loss < 127
         let teachCfg = { maxWt, wasGood, loss, previousLoss }
         in
-        ( teachInterLastInputs boost teachCfg iWts xs
+        ( teachInterLastInputs reluBoost teachCfg iWts xs
         , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))
-            |> map (\(wts, ins) -> teachInterLastInputs boost teachCfg wts ins)
-        , teachInterLastInputs boost teachCfg oWts (last hiddenValsLayers)
+            |> map (\(wts, ins) -> teachInterLastInputs reluBoost teachCfg wts ins)
+        , teachInterLastInputs reluBoost teachCfg oWts (last hiddenValsLayers)
         , goodAnswers + if wasGood then 1 else 0
         , totalLoss + i32.u8 loss
         , answer
