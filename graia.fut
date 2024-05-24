@@ -60,9 +60,6 @@ def outputs [k] [j] (reluBoost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]V
     interWts
     |> map (output reluBoost inputs)
 
-def getStep (maxWt: Wt) (loss: u8) (contrib: i32): i8 =
-    i8.i32 <| ((i32.i8 maxWt - 1) * contrib) / 255
-
 def exciteFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
     if w == -maxWt then
         maxWt - 1
