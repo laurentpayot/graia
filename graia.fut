@@ -1,7 +1,7 @@
--- Graia
+-- 🌄 Graia: an *experimental* neural network library.
 
 -- Wt = Weight
--- A weight of n is actually the inverse of 2 at the power of n (right shift by abs(n) - 1)
+-- A weight of n is actually the inverse of 2 at the power of n (bitwise right shift by abs(n) - 1)
 -- Weights are negative for inhibition, positive for excitation, zero for no connection
 type Wt = i8
 
@@ -25,14 +25,10 @@ type TeachCfg = {
 -- input { -1i8 200u8 } output { -100 }
 -- input { -2i8 200u8 } output { -50 }
 def signedRightShift (w: Wt) (v: Val): i32 =
-    -- if w == -8 then -- TODO remove hardcoded 8
-    --     0
-    -- else
-        if w > 0 then
-            i32.u8 (v >> u8.i8 (w - 1))
-        else
-            -- if needed -1 + 1 (nothing) for less inhibition
-            - i32.u8 (v >> u8.i8 (-w - 1))
+    if w > 0 then
+        i32.u8 (v >> u8.i8 (w - 1))
+    else
+        - i32.u8 (v >> u8.i8 (-w - 1))
 
 -- SKIP ==
 -- entry: activation
@@ -43,7 +39,7 @@ def signedRightShift (w: Wt) (v: Val): i32 =
 def activation (boost: i32) (inputSize: i64) (s: i32): Val =
     -- ReLU
     if s <= 0 then 0 else u8.i32 <| i32.min 255 <|
-        (s * boost) --/ (i32.i64 inputSize)
+        (s * boost)
 
 def dotShift [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
     reduce (+) 0 (map2 signedRightShift wts inputs)
@@ -84,37 +80,21 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
     let wasBetter = loss < previousLoss
     let excite = exciteFor maxWt 1
     let inhibit = inhibitFor maxWt 1
-    -- let wasGood = loss < 16
     in
     interWts
     |> map (\nodeWts ->
         let lastOutput = output boost lastInputs nodeWts
-        let wasTriggered = lastOutput > 0
+        let wasNodeTriggered = lastOutput > 0
         in
         zip nodeWts lastInputs
         |> map (\(w, lastInput) ->
             let wasInputTriggered = lastInput > 0
-            -- let contrib = signedRightShift w lastInput
-            -- let isToChange = i32.abs contrib < i32.u8 loss
-
-            -- Oja’s rule
-            -- let step = i32.u8 lastInput - (signedRightShift w lastOutput)
-
-            -- Laurent Payot’s empiric rule
-            -- let step = contrib - (signedRightShift w lastOutput)
-            -- let step = (signedRightShift w lastOutput) - contrib
-            -- let step = contrib - i32.u8 lastOutput
-            -- let step =  i32.u8 loss - contrib
-            -- let step = contrib - (signedRightShift w lastOutput) + i32.u8 loss
-            -- let step = i32.i8 (w) * (i32.u8 lastInput - (signedRightShift w lastOutput))
-            -- let step = (i32.u8 loss - contrib) * (i32.i8 w)
-            -- let step = -(signedRightShift w loss - signedRightShift w lastOutput)
-            -- let step = -(signedRightShift w loss - contrib)
-
+            -- let inputContrib = signedRightShift w lastInput
             in
             if wasBetter then
+                -- Hebbian learning rule
                 if wasInputTriggered then
-                    if wasTriggered then
+                    if wasNodeTriggered then
                         excite w
                     else
                         inhibit w
@@ -122,7 +102,7 @@ def teachInterLastInputs [k] [j] (boost: i32) (teachCfg: TeachCfg) (interWts: [k
                     w
             else
                 if wasInputTriggered then
-                    if wasTriggered then
+                    if wasNodeTriggered then
                         inhibit w
                     else
                         excite w
@@ -139,9 +119,6 @@ def outputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo]
         in
         (tail valsLayers) ++ [vals] |> sized lmo
     ) (inputsFill ++ [inputs] |> sized lmo) interWtsLayers
-
--- def inputsLayers [lmo] [n] (boost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
---     [inputs] ++ outputsLayers boost inputs (init interWtsLayers) |> sized lmo
 
 -- ==
 -- entry: indexOfGreatest
