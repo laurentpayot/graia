@@ -15,20 +15,27 @@ type TeachCfg = {
     previousLoss: u8
 }
 
--- SKIP ==
+-- ==
 -- entry: signedRightShift
 -- input { 0i8 200u8 } output { 0 }
--- input { 8i8 200u8 } output { 0 }
--- input { -8i8 200u8 } output { 0 }
--- input { 1i8 200u8 } output { 100 }
--- input { 2i8 200u8 } output { 50 }
--- input { -1i8 200u8 } output { -100 }
--- input { -2i8 200u8 } output { -50 }
+-- input { 8i8 200u8 } output { 1 }
+-- input { -8i8 200u8 } output { -1 }
+-- input { 9i8 200u8 } output { 0 }
+-- input { -9i8 200u8 } output { 0 }
+-- input { 1i8 200u8 } output { 200 }
+-- input { 2i8 200u8 } output { 100 }
+-- input { 3i8 200u8 } output { 50 }
+-- input { -1i8 200u8 } output { -200 }
+-- input { -2i8 200u8 } output { -100 }
+-- input { -3i8 200u8 } output { -50 }
 def signedRightShift (w: Wt) (v: Val): i32 =
-    if w > 0 then
-        i32.u8 (v >> u8.i8 (w - 1))
+    if w == 0 then
+        0
     else
-        - i32.u8 (v >> u8.i8 (-w - 1))
+        if w > 0 then
+            i32.u8 (v >> u8.i8 (w - 1))
+        else
+            - i32.u8 (v >> u8.i8 (-w - 1))
 
 -- SKIP ==
 -- entry: activation
