@@ -56,26 +56,27 @@ def teachInterLastInputs [k] [j] (reluBoost: i32) (teachCfg: TeachCfg) (interWts
         in
         zip nodeWts lastInputs
         |> map (\(w, lastInput) ->
-            let wasInputTriggered = lastInput > 0
-            -- let inputContrib = signedRightShift w lastInput
-            in
-            if wasBetter then
-                -- Hebbian learning rule
-                if wasInputTriggered then
-                    if wasNodeTriggered then
-                        excite w
-                    else
-                        inhibit w
-                else
-                    w
-            else
-                if wasInputTriggered then
-                    if wasNodeTriggered then
-                        inhibit w
-                    else
-                        excite w
-                else
-                    w
+            -- let wasInputTriggered = lastInput > 0
+            -- let inputContrib =  w * lastInput
+            -- in
+            -- if wasBetter then
+            --     -- Hebbian learning rule
+            --     if wasInputTriggered then
+            --         if wasNodeTriggered then
+            --             excite w
+            --         else
+            --             inhibit w
+            --     else
+            --         w
+            -- else
+            --     if wasInputTriggered then
+            --         if wasNodeTriggered then
+            --             inhibit w
+            --         else
+            --             excite w
+            --     else
+            --         w
+            w
         )
     )
 
@@ -119,7 +120,7 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 -- lmo = layers minus one
 -- r = rows
 entry fit [r][i][n][lmo][o]
-    (maxWt: i8) (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (reluBoost: i32)
+    (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (reluBoost: i32)
     (xsRows: [r][i]Val) (yRows: [r]Val)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, i32, i64, [o]Val, [lmo + 1][n]Val, u8) =
     foldl (\(iWts, hWtsLayers, oWts, goodAnswers, totalLoss, _, _, _, previousLoss) (xs, y) ->
@@ -129,7 +130,7 @@ entry fit [r][i][n][lmo][o]
         let answer = indexOfGreatest outputVals
         let loss = getLoss outputVals (i64.u8 y)
         let wasGood = answer == i64.u8 y && loss < 127
-        let teachCfg = { maxWt, wasGood, loss, previousLoss }
+        let teachCfg = { wasGood, loss, previousLoss }
         in
         ( teachInterLastInputs reluBoost teachCfg iWts xs
         , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))
