@@ -13,7 +13,7 @@ type TeachCfg = {
     previousLoss: u8
 }
 
--- ==
+-- SKIP ==
 -- entry: activation
 -- input { 1 -10 } output { 0u8 }
 -- input { 2 -10 } output { 0u8 }

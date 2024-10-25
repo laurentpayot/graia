@@ -56,7 +56,6 @@ class Graia:
         self.input_weights = rng.integers(
             -127, 128, dtype=Weight, size=(layer_nodes, inputs)
         )
-        print("input_weights", self.input_weights)
         self.hidden_weights = rng.integers(
             -127, 128, dtype=Weight, size=(layers - 1, layer_nodes, layer_nodes)
         )
