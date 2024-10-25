@@ -31,7 +31,7 @@ class Graia:
         layers: int,
         outputs: int,
         learning_rate: float = 0.1,
-        relu_slope: float = 1.0,
+        relu_slope: float = 20.0,
         seed: int = None,
         # TODO
         # node_inputs=0,
