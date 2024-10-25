@@ -1,7 +1,6 @@
 -- 🌄 Graia: an *experimental* neural network library.
 
 -- Wt = Weight
--- A weight of n is actually the inverse of 2 at the power of n (bitwise right shift by abs(n) - 1)
 -- Weights are negative for inhibition, positive for excitation, zero for no connection
 type Wt = i8
 
@@ -9,33 +8,10 @@ type Wt = i8
 type Val = u8
 
 type TeachCfg = {
-    maxWt: i8,
     wasGood: bool,
     loss: u8,
     previousLoss: u8
 }
-
--- ==
--- entry: signedRightShift
--- input { 0i8 200u8 } output { 0 }
--- input { 8i8 200u8 } output { 1 }
--- input { -8i8 200u8 } output { -1 }
--- input { 9i8 200u8 } output { 0 }
--- input { -9i8 200u8 } output { 0 }
--- input { 1i8 200u8 } output { 200 }
--- input { 2i8 200u8 } output { 100 }
--- input { 3i8 200u8 } output { 50 }
--- input { -1i8 200u8 } output { -200 }
--- input { -2i8 200u8 } output { -100 }
--- input { -3i8 200u8 } output { -50 }
-def signedRightShift (w: Wt) (v: Val): i32 =
-    if w == 0 then
-        0
-    else
-        if w > 0 then
-            i32.u8 (v >> u8.i8 (w - 1))
-        else
-            - i32.u8 (v >> u8.i8 (-w - 1))
 
 -- ==
 -- entry: activation
@@ -44,47 +20,34 @@ def signedRightShift (w: Wt) (v: Val): i32 =
 -- input { 1 127 } output { 127u8 }
 -- input { 2 127 } output { 254u8 }
 -- input { 3 127 } output { 255u8 }
-def activation (reluBoost: i32) (s: i32): Val =
+def activation (inputsNb: i64) (reluBoost: i32) (s: i32): Val =
     -- ReLU
-    if s <= 0 then 0 else u8.i32 <| i32.min 255 <|
-        (s * reluBoost)
+    if s <= 0 then
+        0
+    else
+        (i64.i32 (s * reluBoost)) / (inputsNb * 128)
+        |> i64.min 255
+        |> u8.i64
 
-def dotShift [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
-    reduce (+) 0 (map2 signedRightShift wts inputs)
+def dotProduct [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
+    let i32Inputs = map i32.u8 inputs
+    let i32Wts = map i32.i8 wts
+    in
+    reduce (+) 0 (map2 (*) i32Inputs i32Wts)
 
 def output [j] (reluBoost: i32) (inputs: [j]Val) (wts: [j]Wt): Val =
-    dotShift inputs wts
-    |> activation reluBoost
+    dotProduct inputs wts
+    |> activation j reluBoost
 
 -- input layer with j nodes -> output layer with k nodes
 def outputs [k] [j] (reluBoost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     interWts
     |> map (output reluBoost inputs)
 
-def exciteFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
-    if w == -maxWt then
-        maxWt - 1
-    else
-        if w == 1 then
-            1
-        else
-            w - step
-
-def inhibitFor (maxWt: Wt) (step: i8) (w: Wt): i8 =
-    if w == maxWt then
-        -maxWt + 1
-    else
-        if w == -1 then
-            -1
-        else
-            w + step
-
 -- changes weights between two layers using last input values
 def teachInterLastInputs [k] [j] (reluBoost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
-    let { maxWt, wasGood, loss, previousLoss } = teachCfg
+    let { wasGood, loss, previousLoss } = teachCfg
     let wasBetter = loss < previousLoss
-    let excite = exciteFor maxWt 1
-    let inhibit = inhibitFor maxWt 1
     in
     interWts
     |> map (\nodeWts ->

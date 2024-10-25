@@ -30,7 +30,6 @@ class Graia:
         layer_nodes: int,
         layers: int,
         outputs: int,
-        max_weight: int = 8,  # maximum 8 for unsigned 8 bit integers
         relu_boost: int = 64,
         seed: int = None,
         # TODO
@@ -51,20 +50,19 @@ class Graia:
             "layer_nodes": layer_nodes,
             "layers": layers,
             "outputs": outputs,
-            "max_weight": max_weight,
             "relu_boost": relu_boost,
             # "node_dentrites": node_inputs,
         }
-        # no zero weights
-        wtsRange = np.concatenate(
-            (np.arange(-max_weight, 0), np.arange(1, (max_weight + 1))), dtype=Weight
+        self.input_weights = rng.integers(
+            -127, 128, dtype=Weight, size=(layer_nodes, inputs)
         )
-        # print("Weights range:", wtsRange)
-        self.input_weights = rng.choice(wtsRange, size=(layer_nodes, inputs))
-        self.hidden_weights = rng.choice(
-            wtsRange, size=(layers - 1, layer_nodes, layer_nodes)
+        print("input_weights", self.input_weights)
+        self.hidden_weights = rng.integers(
+            -127, 128, dtype=Weight, size=(layers - 1, layer_nodes, layer_nodes)
         )
-        self.output_weights = rng.choice(wtsRange, size=(outputs, layer_nodes))
+        self.output_weights = rng.integers(
+            -127, 128, dtype=Weight, size=(outputs, layer_nodes)
+        )
         self.history: History = {"accuracy": [], "loss": []}
         print(f"🌄 Graia model with {self.parameters:,} parameters ready.")
 
@@ -88,7 +86,6 @@ class Graia:
                 last_intermediate_outputs,
                 previous_loss,
             ) = graia.fit(
-                np.int8(self.config["max_weight"]),
                 self.input_weights,
                 self.hidden_weights,
                 self.output_weights,
