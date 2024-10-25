@@ -8,6 +8,7 @@ type Wt = i8
 type Val = u8
 
 type TeachCfg = {
+    learningRate: f32,
     wasGood: bool,
     loss: u8,
     previousLoss: u8
@@ -46,7 +47,7 @@ def outputs [k] [j] (reluBoost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]V
 
 -- changes weights between two layers using last input values
 def teachInterLastInputs [k] [j] (reluBoost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
-    let { wasGood, loss, previousLoss } = teachCfg
+    let { learningRate, wasGood, loss, previousLoss } = teachCfg
     let wasBetter = loss < previousLoss
     in
     interWts
@@ -120,7 +121,8 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 -- lmo = layers minus one
 -- r = rows
 entry fit [r][i][n][lmo][o]
-    (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt) (reluBoost: i32)
+    (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
+    (learningRate: f32)  (reluBoost: i32)
     (xsRows: [r][i]Val) (yRows: [r]Val)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, i32, i64, [o]Val, [lmo + 1][n]Val, u8) =
     foldl (\(iWts, hWtsLayers, oWts, goodAnswers, totalLoss, _, _, _, previousLoss) (xs, y) ->
@@ -130,7 +132,7 @@ entry fit [r][i][n][lmo][o]
         let answer = indexOfGreatest outputVals
         let loss = getLoss outputVals (i64.u8 y)
         let wasGood = answer == i64.u8 y && loss < 127
-        let teachCfg = { wasGood, loss, previousLoss }
+        let teachCfg = { learningRate, wasGood, loss, previousLoss }
         in
         ( teachInterLastInputs reluBoost teachCfg iWts xs
         , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))

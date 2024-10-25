@@ -30,6 +30,7 @@ class Graia:
         layer_nodes: int,
         layers: int,
         outputs: int,
+        learning_rate: float = 0.1,
         relu_boost: int = 64,
         seed: int = None,
         # TODO
@@ -50,6 +51,7 @@ class Graia:
             "layer_nodes": layer_nodes,
             "layers": layers,
             "outputs": outputs,
+            "learning_rate": learning_rate,
             "relu_boost": relu_boost,
             # "node_dentrites": node_inputs,
         }
@@ -88,6 +90,7 @@ class Graia:
                 self.input_weights,
                 self.hidden_weights,
                 self.output_weights,
+                np.float32(self.config["learning_rate"]),
                 np.int32(self.config["relu_boost"]),
                 xs,
                 ys,

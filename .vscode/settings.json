@@ -8,6 +8,7 @@
         "opencl",
         "pocl",
         "pyopencl",
+        "relu",
         "retropropagation"
     ],
     "[python]": {
