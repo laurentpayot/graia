@@ -56,27 +56,28 @@ def teachInterLastInputs [k] [j] (reluSlope: f32) (teachCfg: TeachCfg) (interWts
         in
         zip nodeWts lastInputs
         |> map (\(w, lastInput) ->
-            -- let wasInputTriggered = lastInput > 0
-            -- let inputContrib =  w * lastInput
-            -- in
-            -- if wasBetter then
-            --     -- Hebbian learning rule
-            --     if wasInputTriggered then
-            --         if wasNodeTriggered then
-            --             excite w
-            --         else
-            --             inhibit w
-            --     else
-            --         w
-            -- else
-            --     if wasInputTriggered then
-            --         if wasNodeTriggered then
-            --             inhibit w
-            --         else
-            --             excite w
-            --     else
-            --         w
-            w
+            let wasInputTriggered = lastInput > 0
+            -- let inputContrib = (f32.u8 lastInput) * w
+            in
+            (if wasBetter then
+                -- Hebbian learning rule
+                if wasInputTriggered then
+                    if wasNodeTriggered then
+                        w + (learningRate * w)
+                    else
+                        w - (learningRate * w)
+                else
+                    w
+            else
+                if wasInputTriggered then
+                    if wasNodeTriggered then
+                        w - (learningRate * w)
+                    else
+                        w + (learningRate * w)
+                else
+                    w)
+            |> f32.min 1.0
+            |> f32.max (- 1.0)
         )
     )
 
