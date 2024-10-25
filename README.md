@@ -33,6 +33,6 @@ To be sure to have all the Python packages needed, [Anaconda](https://docs.anaco
 
 ## TODO
 
-- Find a working training algorithm 😅
+- convert f32 values to f16 in Futhark
 - Save/load model https://documen.tician.de/pyopencl/array.html#pyopencl.array.Array.get then https://numpy.org/devdocs/reference/generated/numpy.save.html
 - More Futhark tests

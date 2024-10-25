@@ -12,7 +12,7 @@ print(f"🌄 Graia v{VERSION}")
 
 # A weight of n is actually the division by 2 at the power of n (right shift by abs(n))
 # Weights are negative for inhibition, positive for excitation, zero for no connection
-Weight: TypeAlias = np.int8
+Weight: TypeAlias = np.float32
 
 InputVal: TypeAlias = np.uint8
 OutputVal: TypeAlias = np.uint8
@@ -31,7 +31,7 @@ class Graia:
         layers: int,
         outputs: int,
         learning_rate: float = 0.1,
-        relu_boost: int = 64,
+        relu_slope: float = 1.0,
         seed: int = None,
         # TODO
         # node_inputs=0,
@@ -52,18 +52,20 @@ class Graia:
             "layers": layers,
             "outputs": outputs,
             "learning_rate": learning_rate,
-            "relu_boost": relu_boost,
+            "relu_slope": relu_slope,
             # "node_dentrites": node_inputs,
         }
-        self.input_weights = rng.integers(
-            -127, 128, dtype=Weight, size=(layer_nodes, inputs)
+        self.input_weights = (
+            2 * rng.random(size=(layer_nodes, inputs), dtype=Weight) - 1
         )
-        self.hidden_weights = rng.integers(
-            -127, 128, dtype=Weight, size=(layers - 1, layer_nodes, layer_nodes)
+        self.hidden_weights = (
+            2 * rng.random(size=(layers - 1, layer_nodes, layer_nodes), dtype=Weight)
+            - 1
         )
-        self.output_weights = rng.integers(
-            -127, 128, dtype=Weight, size=(outputs, layer_nodes)
+        self.output_weights = (
+            2 * rng.random(size=(outputs, layer_nodes), dtype=Weight) - 1
         )
+
         self.history: History = {"accuracy": [], "loss": []}
         print(f"🌄 Graia model with {self.parameters:,} parameters ready.")
 
@@ -91,7 +93,7 @@ class Graia:
                 self.hidden_weights,
                 self.output_weights,
                 np.float32(self.config["learning_rate"]),
-                np.int32(self.config["relu_boost"]),
+                np.float32(self.config["relu_slope"]),
                 xs,
                 ys,
             )

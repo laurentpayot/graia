@@ -2,7 +2,7 @@
 
 -- Wt = Weight
 -- Weights are negative for inhibition, positive for excitation, zero for no connection
-type Wt = i8
+type Wt = f32 -- real f32 on GPUs, emulated as f32 on CPUs.
 
 -- Val = Value of a node (input, hidden and output)
 type Val = u8
@@ -21,38 +21,37 @@ type TeachCfg = {
 -- input { 1 127 } output { 127u8 }
 -- input { 2 127 } output { 254u8 }
 -- input { 3 127 } output { 255u8 }
-def activation (inputsNb: i64) (reluBoost: i32) (s: i32): Val =
+def activation (inputsNb: i64) (reluSlope: f32) (s: f32): Val =
     -- ReLU
     if s <= 0 then
         0
     else
-        (i64.i32 (s * reluBoost)) / (inputsNb * 128)
-        |> i64.min 255
-        |> u8.i64
+        (s * reluSlope) / (f32.i64 inputsNb)
+        |> f32.min 255
+        |> u8.f32
 
-def dotProduct [j] (inputs: [j]Val) (wts: [j]Wt): i32 =
-    let i32Inputs = map i32.u8 inputs
-    let i32Wts = map i32.i8 wts
+def dotProduct [j] (inputs: [j]Val) (wts: [j]Wt): f32 =
+    let f32Inputs = map f32.u8 inputs
     in
-    reduce (+) 0 (map2 (*) i32Inputs i32Wts)
+    reduce (+) 0 (map2 (*) f32Inputs wts)
 
-def output [j] (reluBoost: i32) (inputs: [j]Val) (wts: [j]Wt): Val =
+def output [j] (reluSlope: f32) (inputs: [j]Val) (wts: [j]Wt): Val =
     dotProduct inputs wts
-    |> activation j reluBoost
+    |> activation j reluSlope
 
 -- input layer with j nodes -> output layer with k nodes
-def outputs [k] [j] (reluBoost: i32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
+def outputs [k] [j] (reluSlope: f32) (inputs: [j]Val) (interWts: [k][j]Wt): [k]Val =
     interWts
-    |> map (output reluBoost inputs)
+    |> map (output reluSlope inputs)
 
 -- changes weights between two layers using last input values
-def teachInterLastInputs [k] [j] (reluBoost: i32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
+def teachInterLastInputs [k] [j] (reluSlope: f32) (teachCfg: TeachCfg) (interWts: [k][j]Wt) (lastInputs: [j]Val) : [k][j]Wt =
     let { learningRate, wasGood, loss, previousLoss } = teachCfg
     let wasBetter = loss < previousLoss
     in
     interWts
     |> map (\nodeWts ->
-        let lastOutput = output reluBoost lastInputs nodeWts
+        let lastOutput = output reluSlope lastInputs nodeWts
         let wasNodeTriggered = lastOutput > 0
         in
         zip nodeWts lastInputs
@@ -81,11 +80,11 @@ def teachInterLastInputs [k] [j] (reluBoost: i32) (teachCfg: TeachCfg) (interWts
         )
     )
 
-def outputsLayers [lmo] [n] (reluBoost: i32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
+def outputsLayers [lmo] [n] (reluSlope: f32) (inputs: [n]Val) (interWtsLayers: [lmo][n][n]Wt): [lmo][n]Val =
     let inputsFill = tabulate_2d (lmo - 1) n (\_ _ -> 0u8)
     in
     foldl (\valsLayers interWts ->
-        let vals = outputs reluBoost (last valsLayers) interWts
+        let vals = outputs reluSlope (last valsLayers) interWts
         in
         (tail valsLayers) ++ [vals] |> sized lmo
     ) (inputsFill ++ [inputs] |> sized lmo) interWtsLayers
@@ -122,22 +121,22 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : u8 =
 -- r = rows
 entry fit [r][i][n][lmo][o]
     (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
-    (learningRate: f32)  (reluBoost: i32)
+    (learningRate: f32)  (reluSlope: f32)
     (xsRows: [r][i]Val) (yRows: [r]Val)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, i32, i64, [o]Val, [lmo + 1][n]Val, u8) =
     foldl (\(iWts, hWtsLayers, oWts, goodAnswers, totalLoss, _, _, _, previousLoss) (xs, y) ->
-        let inputVals = outputs reluBoost xs iWts
-        let hiddenValsLayers = outputsLayers reluBoost inputVals hWtsLayers
-        let outputVals = outputs reluBoost (last hiddenValsLayers) oWts
+        let inputVals = outputs reluSlope xs iWts
+        let hiddenValsLayers = outputsLayers reluSlope inputVals hWtsLayers
+        let outputVals = outputs reluSlope (last hiddenValsLayers) oWts
         let answer = indexOfGreatest outputVals
         let loss = getLoss outputVals (i64.u8 y)
         let wasGood = answer == i64.u8 y && loss < 127
         let teachCfg = { learningRate, wasGood, loss, previousLoss }
         in
-        ( teachInterLastInputs reluBoost teachCfg iWts xs
+        ( teachInterLastInputs reluSlope teachCfg iWts xs
         , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))
-            |> map (\(wts, ins) -> teachInterLastInputs reluBoost teachCfg wts ins)
-        , teachInterLastInputs reluBoost teachCfg oWts (last hiddenValsLayers)
+            |> map (\(wts, ins) -> teachInterLastInputs reluSlope teachCfg wts ins)
+        , teachInterLastInputs reluSlope teachCfg oWts (last hiddenValsLayers)
         , goodAnswers + if wasGood then 1 else 0
         , totalLoss + i32.u8 loss
         , answer
