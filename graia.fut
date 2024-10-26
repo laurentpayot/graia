@@ -55,22 +55,23 @@ def teachInterLastInputs [k] [j] (reluSlope: f32) (teachCfg: TeachCfg) (interWts
         |> map (\(w, lastInput) ->
             let wasInputTriggered = lastInput > 0
             -- let inputContrib = (f32.u8 lastInput) * w
+            let step = learningRate -- * w
             in
             (if wasBetter then
                 -- Hebbian learning rule
                 if wasInputTriggered then
                     if wasNodeTriggered then
-                        w + (learningRate * w)
+                        w + step
                     else
-                        w - (learningRate * w)
+                        w - step
                 else
                     w
             else
                 if wasInputTriggered then
                     if wasNodeTriggered then
-                        w - (learningRate * w)
+                        w - step
                     else
-                        w + (learningRate * w)
+                        w + step
                 else
                     w)
             |> f32.min 1.0
