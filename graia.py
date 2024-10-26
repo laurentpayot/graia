@@ -15,7 +15,7 @@ print(f"🌄 Graia v{VERSION}")
 Weight: TypeAlias = np.float32
 
 InputVal: TypeAlias = np.float32
-OutputVal: TypeAlias = np.float32
+OutputVal: TypeAlias = np.int32
 
 
 class History(TypedDict):
@@ -71,8 +71,8 @@ class Graia:
 
     def fit(
         self,
-        xs: NDArray[InputVal],
-        ys: NDArray[OutputVal],
+        xs: NDArray[np.uint8],
+        ys: NDArray[np.uint8],
         epochs: int,
     ) -> None:
         start = len(self.history["loss"])
@@ -94,7 +94,8 @@ class Graia:
                 self.output_weights,
                 np.float32(self.config["learning_rate"]),
                 np.float32(self.config["relu_slope"]),
-                InputVal(xs),
+                # normalizing inputs
+                InputVal(xs / 255),
                 OutputVal(ys),
             )
             self.input_weights = graia.from_futhark(input_weights)
