@@ -4,9 +4,10 @@ An *experimental* neural network library.
 
 ## Goals
 
-- *Not* using a retropropagation algorithm for training. Retropropagation works pretty well but the main goal of this project is to find a training algorithm that would work using only the information available *locally* to the nodes. Current status: **Work In Progress** 👩‍💻 (70% accuracy for now). ![Learning curves](learning.png)
-- Written in [Futhark](https://futhark-lang.org/) to leverage OpenCL for GPU acceleration.
+- *Not* using a retropropagation algorithm for training. Retropropagation works pretty well but the main goal of this project is to find a *biologically plausible* training algorithm that would work using only the information available *locally* to the nodes. Current status: **Work In Progress** 👩‍💻 (70% accuracy for now). ![Learning curves](learning.png)
 - Python API similar to [TensorFlow](https://www.tensorflow.org/).
+
+Graia’s core is written in [Futhark](https://futhark-lang.org/) to leverage OpenCL for GPU acceleration.
 
 ## Online Demo
 
