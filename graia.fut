@@ -105,10 +105,12 @@ def indexOfGreatest (ys: []Val) : i64 =
 -- input { [0u8, 0u8, 255u8, 0u8] 1i64 } output { 127u8 }
 def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : f32 =
     let idealOutputVals = tabulate o (\i -> if i == correctIndex then 1 else 0)
+    let moxOutput = outputVals[indexOfGreatest outputVals]
+    let normalizationCoef = if moxOutput == 0 then 1 else (1 / moxOutput)
     in
     zip outputVals idealOutputVals
     -- mean absolute error
-    |> map (\(out, ideal) -> f32.abs (out - ideal))
+    |> map (\(out, ideal) -> f32.abs ((out * normalizationCoef) - ideal))
     |> reduce (+) 0
     |> (\sum -> sum / f32.i64 o)
 
@@ -128,7 +130,7 @@ entry fit [r][i][n][lmo][o]
         let outputVals = outputs reluSlope (last hiddenValsLayers) oWts
         let answer = indexOfGreatest outputVals
         let loss = getLoss outputVals y
-        let wasGood = answer == y -- && loss < 0.5
+        let wasGood = answer == y  && outputVals[answer] > 0
         let teachCfg = { learningRate, wasGood, loss, previousLoss }
         in
         ( teachInterLastInputs reluSlope teachCfg iWts xs
