@@ -14,8 +14,9 @@ print(f"🌄 Graia v{VERSION}")
 # Weights are negative for inhibition, positive for excitation, zero for no connection
 Weight: TypeAlias = np.float32
 
+# https://www.tensorflow.org/datasets/catalog/mnist
 InputVal: TypeAlias = np.float32
-OutputVal: TypeAlias = np.int32
+Label: TypeAlias = np.int64
 
 
 class History(TypedDict):
@@ -72,7 +73,7 @@ class Graia:
     def fit(
         self,
         xs: NDArray[np.uint8],
-        ys: NDArray[np.uint8],
+        ys: NDArray[Label],
         epochs: int,
     ) -> None:
         start = len(self.history["loss"])
@@ -96,7 +97,7 @@ class Graia:
                 np.float32(self.config["relu_slope"]),
                 # normalizing inputs
                 InputVal(xs / 255),
-                OutputVal(ys),
+                ys,
             )
             self.input_weights = graia.from_futhark(input_weights)
             self.hidden_weights = graia.from_futhark(hidden_weights)

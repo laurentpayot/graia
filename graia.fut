@@ -120,10 +120,8 @@ def getLoss [o] (outputVals: [o]Val) (correctIndex: i64) : f32 =
 entry fit [r][i][n][lmo][o]
     (inputWts: [n][i]Wt) (hiddenWtsLayers: [lmo][n][n]Wt) (outputWts: [o][n]Wt)
     (learningRate: f32)  (reluSlope: f32)
-    (xsRows: [r][i]Val) (yRowsI32: [r]i32)
+    (xsRows: [r][i]Val) (yRows: [r]i64)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, f32, i64, [o]Val, [lmo + 1][n]Val, f32) =
-    let yRows = map (i64.i32) yRowsI32
-    in
     foldl (\(iWts, hWtsLayers, oWts, goodAnswers, totalLoss, _, _, _, previousLoss) (xs, y) ->
         let inputVals = outputs reluSlope xs iWts
         let hiddenValsLayers = outputsLayers reluSlope inputVals hWtsLayers
