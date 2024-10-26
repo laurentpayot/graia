@@ -14,8 +14,8 @@ print(f"🌄 Graia v{VERSION}")
 # Weights are negative for inhibition, positive for excitation, zero for no connection
 Weight: TypeAlias = np.float32
 
-InputVal: TypeAlias = np.uint8
-OutputVal: TypeAlias = np.uint8
+InputVal: TypeAlias = np.float32
+OutputVal: TypeAlias = np.float32
 
 
 class History(TypedDict):
@@ -94,8 +94,8 @@ class Graia:
                 self.output_weights,
                 np.float32(self.config["learning_rate"]),
                 np.float32(self.config["relu_slope"]),
-                xs,
-                ys,
+                InputVal(xs),
+                OutputVal(ys),
             )
             self.input_weights = graia.from_futhark(input_weights)
             self.hidden_weights = graia.from_futhark(hidden_weights)
@@ -107,7 +107,7 @@ class Graia:
             )
             accuracy = correct_answers / ys.size
             self.history["accuracy"].append(accuracy)
-            loss = total_loss / (ys.size * 255)
+            loss = total_loss / ys.size
             self.history["loss"].append(loss)
             progress = "█" * (12 * epoch // epochs)
             rest = "░" * (12 - len(progress))
