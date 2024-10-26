@@ -4,7 +4,7 @@ An *experimental* neural network library.
 
 ## Goals
 
-- *Not* using a retropropagation algorithm for training. Retropropagation works pretty well but the main goal of this project is to find a training algorithm that would work using only the information available *locally* to the nodes. Current status: **Work In Progress** 👩‍💻 (new temporal algorithm).
+- *Not* using a retropropagation algorithm for training. Retropropagation works pretty well but the main goal of this project is to find a training algorithm that would work using only the information available *locally* to the nodes. Current status: **Work In Progress** 👩‍💻 (70% accuracy for now). ![Learning curves](learning.png)
 - Written in [Futhark](https://futhark-lang.org/) to leverage OpenCL for GPU acceleration.
 - Python API similar to [TensorFlow](https://www.tensorflow.org/).
 
