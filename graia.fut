@@ -57,7 +57,7 @@ def teachInterLastInputs [k] [j] (reluSlope: f32) (teachCfg: TeachCfg) (interWts
             -- let inputContrib = (f32.u8 lastInput) * w
             let step = learningRate -- * w
             in
-            (if wasBetter then
+            (if wasGood then
                 -- Hebbian learning rule
                 if wasInputTriggered then
                     if wasNodeTriggered then
@@ -130,7 +130,7 @@ entry fit [r][i][n][lmo][o]
         let outputVals = outputs reluSlope (last hiddenValsLayers) oWts
         let answer = indexOfGreatest outputVals
         let loss = getLoss outputVals y
-        let wasGood = answer == y && loss < 0.5
+        let wasGood = answer == y -- && loss < 0.5
         let teachCfg = { learningRate, wasGood, loss, previousLoss }
         in
         ( teachInterLastInputs reluSlope teachCfg iWts xs
