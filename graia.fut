@@ -26,8 +26,9 @@ def activation (inputsNb: i64) (reluSlope: f32) (s: f32): Val =
     if s <= 0 then
         0
     else
-        (s * reluSlope) / (f32.i64 inputsNb)
-        |> f32.min 1
+        -- (s * reluSlope) / (f32.i64 inputsNb) -- + 0.1
+        --  |> f32.min 1
+        if reluSlope == 0 then 1 else f32.min 1 ((s * reluSlope) / (f32.i64 inputsNb))
 
 def dotProduct [j] (inputs: [j]Val) (wts: [j]Wt): f32 =
     reduce (+) 0 (map2 (*) inputs wts)
@@ -53,9 +54,9 @@ def teachInterLastInputs [k] [j] (reluSlope: f32) (teachCfg: TeachCfg) (interWts
         in
         zip nodeWts lastInputs
         |> map (\(w, lastInput) ->
+            let inputContrib = lastInput * w
             let wasInputTriggered = lastInput > 0
-            -- let inputContrib = (f32.u8 lastInput) * w
-            let step = learningRate -- * w
+            let step = learningRate * loss
             in
             (if wasGood then
                 -- Hebbian learning rule
@@ -65,15 +66,16 @@ def teachInterLastInputs [k] [j] (reluSlope: f32) (teachCfg: TeachCfg) (interWts
                     else
                         w - step
                 else
-                    w
+                    w -- * (1 - learningRate)
             else
                 if wasInputTriggered then
                     if wasNodeTriggered then
                         w - step
                     else
-                        w + step
+                       w + step
                 else
-                    w)
+                    w -- * (1 - learningRate)
+            )
             |> f32.min 1.0
             |> f32.max (- 1.0)
         )
@@ -125,17 +127,17 @@ entry fit [r][i][n][lmo][o]
     (xsRows: [r][i]Val) (yRows: [r]i64)
     : ([n][i]Wt, [lmo][n][n]Wt, [o][n]Wt, i32, f32, i64, [o]Val, [lmo + 1][n]Val, f32) =
     foldl (\(iWts, hWtsLayers, oWts, goodAnswers, totalLoss, _, _, _, previousLoss) (xs, y) ->
-        let inputVals = outputs reluSlope xs iWts
-        let hiddenValsLayers = outputsLayers reluSlope inputVals hWtsLayers
+        let inputVals = outputs 0 xs iWts
+        let hiddenValsLayers = outputsLayers 0 inputVals hWtsLayers
         let outputVals = outputs reluSlope (last hiddenValsLayers) oWts
         let answer = indexOfGreatest outputVals
         let loss = getLoss outputVals y
         let wasGood = answer == y  && outputVals[answer] > 0
         let teachCfg = { learningRate, wasGood, loss, previousLoss }
         in
-        ( teachInterLastInputs reluSlope teachCfg iWts xs
+        ( teachInterLastInputs 0 teachCfg iWts xs
         , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))
-            |> map (\(wts, ins) -> teachInterLastInputs reluSlope teachCfg wts ins)
+            |> map (\(wts, ins) -> teachInterLastInputs 0 teachCfg wts ins)
         , teachInterLastInputs reluSlope teachCfg oWts (last hiddenValsLayers)
         , goodAnswers + if wasGood then 1 else 0
         , totalLoss + loss
