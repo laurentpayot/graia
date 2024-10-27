@@ -129,6 +129,7 @@ entry fit [r][i][n][lmo][o]
     foldl (\(iWts, hWtsLayers, oWts, goodAnswers, totalLoss, _, _, _, previousLoss) (xs, y) ->
         let inputVals = outputs 0 xs iWts
         let hiddenValsLayers = outputsLayers 0 inputVals hWtsLayers
+        -- TODO special outputs function for outputVals so reluSlope parameter isn't needed
         let outputVals = outputs reluSlope (last hiddenValsLayers) oWts
         let answer = indexOfGreatest outputVals
         let loss = getLoss outputVals y
@@ -138,7 +139,7 @@ entry fit [r][i][n][lmo][o]
         ( teachInterLastInputs 0 teachCfg iWts xs
         , zip hWtsLayers (sized lmo ([inputVals] ++ init hiddenValsLayers))
             |> map (\(wts, ins) -> teachInterLastInputs 0 teachCfg wts ins)
-        , teachInterLastInputs reluSlope teachCfg oWts (last hiddenValsLayers)
+        , teachInterLastInputs 0 teachCfg oWts (last hiddenValsLayers)
         , goodAnswers + if wasGood then 1 else 0
         , totalLoss + loss
         , answer
