@@ -17,7 +17,7 @@ open Tools
 #!fsharp
 
 let labels, images = loadMnist "datasets/mnist_train_head.csv"
-printfn $"Images: {images.Length}"
+printfn $"Images: {Seq.length images}"
 
 #!fsharp
 
