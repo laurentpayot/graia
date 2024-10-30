@@ -29,18 +29,14 @@ let toSquareSvg (size: float) (bytes: byte seq) : string =
     let side = array.Length |> sqrt
 
     let mutable svg =
-        $"""<svg width="{(float side) * size}" height="{(float side) * size}" viewBox="0 0 {side} {side}" xmlns="http://www.w3.org/2000/svg">"""
-        + "\n"
+        $"""<svg width="{(float side) * size}" height="{(float side) * size}" viewBox="0 0 {side} {side}" xmlns="http://www.w3.org/2000/svg">\n"""
 
     for y = 0 to side - 1 do
         for x = 0 to side - 1 do
             let v = array[x + y * side]
 
-            svg <-
-                svg
-                + $"""<rect x="{x}" y="{y}" width="1" height="1" fill="rgb({v},{v},{v})"/>"""
+            svg <- $"""{svg}<rect x="{x}" y="{y}" width="1" height="1" fill="rgb({v},{v},{v})"/>"""
 
         svg <- svg + "\n"
 
-    svg <- svg + "</svg>"
-    svg
+    svg + "</svg>"
