@@ -26,3 +26,4 @@ images
 |> Array.map (binarize 200)
 |> Array.map (toSquareSvg 1)
 |> Array.map (fun svg -> svg.DisplayAs("image/svg+xml"))
+|> ignore
