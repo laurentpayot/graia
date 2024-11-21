@@ -51,12 +51,12 @@ def teachInterLastInputs [k] [j] (reluSlope: f32) (teachCfg: TeachCfg) (interWts
     |> map (\nodeWts ->
         let lastOutput = output reluSlope lastInputs nodeWts
         let wasNodeTriggered = lastOutput > 0
+        let step = learningRate * loss
         in
         zip nodeWts lastInputs
         |> map (\(w, lastInput) ->
             let inputContrib = lastInput * w
             let wasInputTriggered = lastInput > 0
-            let step = learningRate * loss
             in
             (if wasGood then
                 -- Hebbian learning rule
